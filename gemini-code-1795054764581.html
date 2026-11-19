@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photosynthesis & Cellular Respiration: pH Indicator Lab</title>
+  <style>
+    :root {
+      --bg-page: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #cbd5e1;
+      --accent-green: #059669;
+      --accent-blue: #0284c7;
+      --accent-amber: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 40px;
+    }
+
+    /* Header */
+    header {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 3px solid #10b981;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .badge-green {
+      background: #10b981;
+      color: #022c22;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-sub {
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    header h1 {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .equations-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .equations-box span.photo {
+      color: #34d399;
+      font-weight: 700;
+    }
+
+    .equations-box span.resp {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    /* Main Layout */
+    .container {
+      max-width: 1200px;
+      margin: 22px auto 0;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 920px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      background: #f8fafc;
+      padding: 12px 18px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot-live {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+    }
+
+    /* pH Indicator Color Key */
+    .ph-key {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .key-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid rgba(0,0,0,0.2);
+      display: inline-block;
+    }
+
+    /* Canvas Area */
+    .canvas-wrap {
+      background: #0f172a;
+      width: 100%;
+    }
+
+    #labCanvas {
+      display: block;
+      width: 100%;
+      height: 360px;
+    }
+
+    /* Lab Protocol Controls */
+    .controls {
+      padding: 18px;
+    }
+
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .step-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .step-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .step-btn:hover:not(:disabled) {
+      border-color: #0284c7;
+      background: #f0f9ff;
+    }
+
+    .step-btn.done {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #065f46;
+    }
+
+    .step-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .step-btn.done .step-num {
+      background: #10b981;
+      color: #ffffff;
+    }
+
+    /* Time Simulation Bar */
+    .time-bar {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .time-readout {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .time-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    #clockDisplay {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .time-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-run {
+      padding: 10px 18px;
+      background: #059669;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-run:hover:not(:disabled) {
+      background: #047857;
+    }
+
+    .btn-run:disabled {
+      background: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .btn-reset {
+      padding: 10px 14px;
+      background: #e2e8f0;
+      color: #334155;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-reset:hover {
+      background: #cbd5e1;
+    }
+
+    /* Explanation Box */
+    .callout {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .callout h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+    }
+
+    .callout p {
+      font-size: 13px;
+      color: #1e40af;
+    }
+
+    /* Right Column: Data Table & Quiz */
+    .panel-body {
+      padding: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      padding: 9px 8px;
+      font-weight: 700;
+      color: #334155;
+      border-bottom: 1px solid #cbd5e1;
+    }
+
+    td {
+      padding: 9px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+
+    .color-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .q-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .q-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .q-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    .feedback {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .btn-check {
+      width: 100%;
+      padding: 11px;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .btn-check:hover {
+      background: #1e293b;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="badge-row">
+          <span class="badge-green">7th Grade Life Science</span>
+          <span class="badge-sub">MS-LS1-6 & MS-LS1-7 Investigation</span>
+        </div>
+        <h1>Photosynthesis & Cellular Respiration: pH Indicator Lab</h1>
+      </div>
+      <div class="equations-box">
+        <div><span class="photo">Photosynthesis (Light):</span> CO₂ + H₂O + Light → Glucose + O₂ <em>(Uses CO₂)</em></div>
+        <div><span class="resp">Cellular Respiration (24/7):</span> Glucose + O₂ → CO₂ + H₂O + Energy <em>(Releases CO₂)</em></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Left Column: Interactive Virtual Lab -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h2><span class="dot-live"></span> Virtual Test Tube Rack (4-Tube Controlled Experiment)</h2>
+          <span id="statusBadge" style="font-size:12px; font-weight:700; color:#0284c7;">Step 1: Set up the test tubes</span>
+        </div>
+
+        <!-- Bromothymol Blue Color Key -->
+        <div class="ph-key">
+          <strong style="color:#334155;">BTB pH Indicator Key:</strong>
+          <div class="key-item">
+            <span class="swatch" style="background:#eab308;"></span>
+            <span>Yellow = High CO₂ (Acidic)</span>
+          </div>
+          <div class="key-item">
+            <span class="swatch" style="background:#10b981;"></span>
+            <span>Green = Neutral CO₂ (Start)</span>
+          </div>
+          <div class="key-item">
+            <span class="swatch" style="background:#2563eb;"></span>
+            <span>Blue = Low CO₂ (Basic)</span>
+          </div>
+        </div>
+
+        <!-- Simulation Canvas -->
+        <div class="canvas-wrap">
+          <canvas id="labCanvas" width="680" height="360"></canvas>
+        </div>
+
+        <!-- Protocol Steps & Timer -->
+        <div class="controls">
+          <div class="step-grid">
+            <button type="button" id="btnStep1" class="step-btn">
+              <span class="step-num">1</span>
+              <span>Fill Tubes 1–4 with Green BTB Solution</span>
+            </button>
+            <button type="button" id="btnStep2" class="step-btn" disabled>
+              <span class="step-num">2</span>
+              <span>Add <em>Elodea</em> Plant to Tubes 3 & 4</span>
+            </button>
+            <button type="button" id="btnStep3" class="step-btn" disabled>
+              <span class="step-num">3</span>
+              <span>Place Dark Box Over Tubes 2 & 4</span>
+            </button>
+            <button type="button" id="btnStep4" class="step-btn" disabled>
+              <span class="step-num">4</span>
+              <span>Turn On Grow Lamp</span>
+            </button>
+          </div>
+
+          <div class="time-bar">
+            <div class="time-readout">
+              <span class="time-label">Elapsed Experiment Time</span>
+              <span id="clockDisplay">0 Hours</span>
+            </div>
+            <div class="time-actions">
+              <button type="button" id="btnRun24" class="btn-run" disabled>▶ Run 24 Hours</button>
+              <button type="button" id="btnReset" class="btn-reset">↺ Reset Lab</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Explanation Card -->
+      <div class="callout">
+        <h3>🔬 Lab Guide & What to Watch For</h3>
+        <p id="guideText">
+          Follow <strong>Steps 1–4</strong> above to prepare your experiment. Tubes 1 and 2 have <strong>no plants</strong> (they are your controls). Tubes 3 and 4 contain aquatic <em>Elodea</em> plants—one in the light and one blocked from light!
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Observation Table & Analysis Quiz -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h2>Live Data & Observation Table</h2>
+        </div>
+        <div class="panel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Tube</th>
+                <th>Contents & Light</th>
+                <th>Start Color</th>
+                <th>Current Color</th>
+                <th>What Happened to CO₂?</th>
+              </tr>
+            </thead>
+            <tbody id="obsTableBody">
+              <tr>
+                <td><strong>Tube 1</strong></td>
+                <td>No Plant<br><small style="color:#64748b;">In Light (Control)</small></td>
+                <td>—</td>
+                <td><span class="color-pill" style="background:#e2e8f0; color:#475569;">Empty</span></td>
+                <td>Waiting for setup</td>
+              </tr>
+              <tr>
+                <td><strong>Tube 2</strong></td>
+                <td>No Plant<br><small style="color:#64748b;">In Dark Box (Control)</small></td>
+                <td>—</td>
+                <td><span class="color-pill" style="background:#e2e8f0; color:#475569;">Empty</span></td>
+                <td>Waiting for setup</td>
+              </tr>
+              <tr>
+                <td><strong>Tube 3</strong></td>
+                <td><em>Elodea</em> Plant<br><small style="color:#64748b;">In Light</small></td>
+                <td>—</td>
+                <td><span class="color-pill" style="background:#e2e8f0; color:#475569;">Empty</span></td>
+                <td>Waiting for setup</td>
+              </tr>
+              <tr>
+                <td><strong>Tube 4</strong></td>
+                <td><em>Elodea</em> Plant<br><small style="color:#64748b;">In Dark Box</small></td>
+                <td>—</td>
+                <td><span class="color-pill" style="background:#e2e8f0; color:#475569;">Empty</span></td>
+                <td>Waiting for setup</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Check Your Understanding -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Check Your Understanding</h2>
+        </div>
+        <div class="panel-body">
+          <div class="q-box">
+            <div class="q-title">1. Why did Tube 3 (Elodea in the light) turn from green to blue?</div>
+            <label class="q-option">
+              <input type="radio" name="q1" value="a" />
+              <span>Photosynthesis absorbed CO₂ faster than cellular respiration released it, lowering CO₂ in the water.</span>
+            </label>
+            <label class="q-option">
+              <input type="radio" name="q1" value="b" />
+              <span>The plant stopped doing cellular respiration and released blue dye.</span>
+            </label>
+            <label class="q-option">
+              <input type="radio" name="q1" value="c" />
+              <span>Light heat evaporated all the water in Tube 3.</span>
+            </label>
+            <div id="q1Feedback" class="feedback"></div>
+          </div>
+
+          <div class="q-box">
+            <div class="q-title">2. Why did Tube 4 (Elodea in the dark box) turn from green to yellow?</div>
+            <label class="q-option">
+              <input type="radio" name="q2" value="a" />
+              <span>Without light, photosynthesis stopped, so cellular respiration kept releasing CO₂ into the water.</span>
+            </label>
+            <label class="q-option">
+              <input type="radio" name="q2" value="b" />
+              <span>The cardboard box blocked oxygen from entering the room.</span>
+            </label>
+            <label class="q-option">
+              <input type="radio" name="q2" value="c" />
+              <span>Plants only do photosynthesis in total darkness.</span>
+            </label>
+            <div id="q2Feedback" class="feedback"></div>
+          </div>
+
+          <div class="q-box">
+            <div class="q-title">3. Why were Tubes 1 and 2 (no plants) included in the experiment?</div>
+            <label class="q-option">
+              <input type="radio" name="q3" value="a" />
+              <span>As controls to prove that light or darkness alone does not change the indicator color without a plant.</span>
+            </label>
+            <label class="q-option">
+              <input type="radio" name="q3" value="b" />
+              <span>To give the Elodea plants extra water later.</span>
+            </label>
+            <div id="q3Feedback" class="feedback"></div>
+          </div>
+
+          <button type="button" id="btnCheckAnswers" class="btn-check">Check My Answers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const state = {
+        hasLiquid: false,
+        hasPlants: false,
+        hasDarkBox: false,
+        lampOn: false,
+        hours: 0, // 0 to 24
+        running: false
+      };
+
+      const canvas = document.getElementById('labCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const btnStep1 = document.getElementById('btnStep1');
+      const btnStep2 = document.getElementById('btnStep2');
+      const btnStep3 = document.getElementById('btnStep3');
+      const btnStep4 = document.getElementById('btnStep4');
+      const btnRun24 = document.getElementById('btnRun24');
+      const btnReset = document.getElementById('btnReset');
+      const clockDisplay = document.getElementById('clockDisplay');
+      const statusBadge = document.getElementById('statusBadge');
+      const guideText = document.getElementById('guideText');
+      const obsTableBody = document.getElementById('obsTableBody');
+
+      let animInterval = null;
+      let bubbles = [];
+
+      // Helper to interpolate RGB colors smoothly
+      function lerpColor(c1, c2, t) {
+        const r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
+        const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
+        const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
+      }
+
+      // Colors: Green [16, 185, 129], Blue [37, 99, 235], Yellow [234, 179, 8]
+      const COL_GREEN = [16, 185, 129];
+      const COL_BLUE = [37, 99, 235];
+      const COL_YELLOW = [234, 179, 8];
+
+      function getTubeLiquidColor(tubeNum) {
+        const progress = Math.min(1, state.hours / 24);
+        if (tubeNum === 1 || tubeNum === 2) {
+          return lerpColor(COL_GREEN, COL_GREEN, progress);
+        }
+        if (tubeNum === 3) {
+          // Elodea in light -> turns Blue
+          return lerpColor(COL_GREEN, COL_BLUE, progress);
+        }
+        if (tubeNum === 4) {
+          // Elodea in dark -> turns Yellow
+          return lerpColor(COL_GREEN, COL_YELLOW, progress);
+        }
+      }
+
+      function updateTable() {
+        const progress = state.hours / 24;
+
+        function getBadge(tubeNum) {
+          if (!state.hasLiquid) {
+            return '<span class="color-pill" style="background:#e2e8f0; color:#475569;">Empty</span>';
+          }
+          if (progress === 0) {
+            return '<span class="color-pill" style="background:#d1fae5; color:#065f46;">Green (Neutral)</span>';
+          }
+          if (tubeNum === 1 || tubeNum === 2) {
+            return '<span class="color-pill" style="background:#d1fae5; color:#065f46;">Green (Unchanged)</span>';
+          }
+          if (tubeNum === 3) {
+            if (progress < 0.5) return '<span class="color-pill" style="background:#ccfbf1; color:#0f766e;">Blue-Green</span>';
+            return '<span class="color-pill" style="background:#dbeafe; color:#1e40af;">Blue (Low CO₂)</span>';
+          }
+          if (tubeNum === 4) {
+            if (progress < 0.5) return '<span class="color-pill" style="background:#fef9c3; color:#854d0e;">Yellow-Green</span>';
+            return '<span class="color-pill" style="background:#fef08a; color:#713f12;">Yellow (High CO₂)</span>';
+          }
+        }
+
+        function getChangeText(tubeNum) {
+          if (!state.hasLiquid) return 'Waiting for setup';
+          if (progress === 0) return 'Ready to run 24 hours';
+          if (tubeNum === 1 || tubeNum === 2) return 'No change (no organism present)';
+          if (tubeNum === 3) return 'CO₂ decreased (Photosynthesis > Respiration)';
+          if (tubeNum === 4) return 'CO₂ increased (Respiration only; no light)';
+        }
+
+        const startCol = state.hasLiquid ? 'Green' : '—';
+
+        obsTableBody.innerHTML =
+          '<tr>' +
+            '<td><strong>Tube 1</strong></td>' +
+            '<td>No Plant<br><small style="color:#64748b;">In Light (Control)</small></td>' +
+            '<td>' + startCol + '</td>' +
+            '<td>' + getBadge(1) + '</td>' +
+            '<td>' + getChangeText(1) + '</td>' +
+          '</tr>' +
+          '<tr>' +
+            '<td><strong>Tube 2</strong></td>' +
+            '<td>No Plant<br><small style="color:#64748b;">In Dark Box (Control)</small></td>' +
+            '<td>' + startCol + '</td>' +
+            '<td>' + getBadge(2) + '</td>' +
+            '<td>' + getChangeText(2) + '</td>' +
+          '</tr>' +
+          '<tr>' +
+            '<td><strong>Tube 3</strong></td>' +
+            '<td><em>Elodea</em> Plant<br><small style="color:#64748b;">In Light</small></td>' +
+            '<td>' + startCol + '</td>' +
+            '<td>' + getBadge(3) + '</td>' +
+            '<td>' + getChangeText(3) + '</td>' +
+          '</tr>' +
+          '<tr>' +
+            '<td><strong>Tube 4</strong></td>' +
+            '<td><em>Elodea</em> Plant<br><small style="color:#64748b;">In Dark Box</small></td>' +
+            '<td>' + startCol + '</td>' +
+            '<td>' + getBadge(4) + '</td>' +
+            '<td>' + getChangeText(4) + '</td>' +
+          '</tr>';
+      }
+
+      function drawElodea(cx, bottomY, height) {
+        ctx.strokeStyle = '#14532d';
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx, bottomY);
+        ctx.lineTo(cx, bottomY - height);
+        ctx.stroke();
+
+        const steps = 6;
+        for (let i = 1; i <= steps; i++) {
+          const ly = bottomY - (i * (height / (steps + 1)));
+          ctx.fillStyle = '#22c55e';
+          ctx.strokeStyle = '#14532d';
+          ctx.lineWidth = 1;
+
+          // Left leaf
+          ctx.beginPath();
+          ctx.ellipse(cx - 10, ly, 10, 4, -0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Right leaf
+          ctx.beginPath();
+          ctx.ellipse(cx + 10, ly - 3, 10, 4, 0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      function drawLab(timestamp) {
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Background
+        ctx.fillStyle = state.lampOn ? '#1e293b' : '#0f172a';
+        ctx.fillRect(0, 0, w, h);
+
+        // Lab Bench Table
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(0, h - 36, w, 36);
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(0, h - 36, w, 4);
+
+        // Overhead Grow Lamp
+        const lampX = w / 2;
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(lampX - 18, 0, 36, 18);
+        ctx.fillStyle = '#334155';
+        ctx.beginPath();
+        ctx.moveTo(lampX - 55, 42);
+        ctx.lineTo(lampX - 24, 18);
+        ctx.lineTo(lampX + 24, 18);
+        ctx.lineTo(lampX + 55, 42);
+        ctx.closePath();
+        ctx.fill();
+
+        // Bulb & Light Cone
+        ctx.beginPath();
+        ctx.arc(lampX, 44, 14, 0, Math.PI);
+        ctx.fillStyle = state.lampOn ? '#fef08a' : '#475569';
+        ctx.fill();
+
+        if (state.lampOn) {
+          const beam = ctx.createLinearGradient(lampX, 45, lampX, h - 36);
+          beam.addColorStop(0, 'rgba(254, 240, 138, 0.35)');
+          beam.addColorStop(1, 'rgba(254, 240, 138, 0.04)');
+          ctx.fillStyle = beam;
+          ctx.beginPath();
+          ctx.moveTo(lampX - 50, 42);
+          ctx.lineTo(lampX + 50, 42);
+          ctx.lineTo(w - 30, h - 36);
+          ctx.lineTo(30, h - 36);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Tube Positions (1, 2, 3, 4)
+        const tubeCenters = [115, 265, 415, 565];
+        const tubeW = 54;
+        const tubeH = 185;
+        const tubeTop = 122;
+
+        // Draw Rack Behind Tubes
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(70, tubeTop + 35, w - 140, 8);
+        ctx.fillRect(70, tubeTop + tubeH - 8, w - 140, 12);
+
+        tubeCenters.forEach(function (cx, idx) {
+          const tubeNum = idx + 1;
+          const x = cx - tubeW / 2;
+
+          // Liquid inside tube
+          if (state.hasLiquid) {
+            ctx.fillStyle = getTubeLiquidColor(tubeNum);
+            ctx.beginPath();
+            ctx.roundRect(x + 3, tubeTop + 28, tubeW - 6, tubeH - 31, [0, 0, 22, 22]);
+            ctx.fill();
+          }
+
+          // Plant inside Tubes 3 & 4
+          if (state.hasPlants && (tubeNum === 3 || tubeNum === 4)) {
+            drawElodea(cx, tubeTop + tubeH - 14, 125);
+          }
+
+          // O2 Bubbles rising in Tube 3 when lamp is on
+          if (state.lampOn && state.hasLiquid && state.hasPlants && tubeNum === 3) {
+            if (Math.random() < 0.14) {
+              bubbles.push({
+                x: cx + (Math.random() * 20 - 10),
+                y: tubeTop + tubeH - 35 - Math.random() * 70,
+                r: 2.2 + Math.random() * 2
+              });
+            }
+          }
+
+          for (let i = bubbles.length - 1; i >= 0; i--) {
+            const b = bubbles[i];
+            if (Math.abs(b.x - cx) < 25) {
+              b.y -= 0.9;
+              if (b.y < tubeTop + 32) {
+                bubbles.splice(i, 1);
+                continue;
+              }
+              ctx.beginPath();
+              ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+              ctx.fill();
+            }
+          }
+
+          // Glass Test Tube Outline
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.roundRect(x, tubeTop, tubeW, tubeH, [4, 4, 26, 26]);
+          ctx.stroke();
+
+          // Rubber Stopper
+          ctx.fillStyle = '#64748b';
+          ctx.beginPath();
+          ctx.roundRect(cx - 20, tubeTop - 10, 40, 14, 3);
+          ctx.fill();
+
+          // Dark Cardboard Sleeve over Tubes 2 & 4 (semi-transparent cutaway so students see color change)
+          if (state.hasDarkBox && (tubeNum === 2 || tubeNum === 4)) {
+            ctx.fillStyle = 'rgba(120, 53, 15, 0.72)';
+            ctx.strokeStyle = '#d97706';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(x - 10, tubeTop - 18, tubeW + 20, tubeH + 22, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#fef3c7';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('DARK BOX', cx, tubeTop - 24);
+          }
+
+          // Tube Number Label
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.roundRect(cx - 14, tubeTop + 82, 28, 24, 5);
+          ctx.fill();
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(tubeNum, cx, tubeTop + 99);
+
+          // Bottom Caption
+          ctx.fillStyle = '#cbd5e1';
+          ctx.font = 'bold 11px sans-serif';
+          const subLabel = tubeNum === 1 ? 'No Plant (Light)' :
+                           tubeNum === 2 ? 'No Plant (Dark)' :
+                           tubeNum === 3 ? 'Plant (Light)' : 'Plant (Dark)';
+          ctx.fillText(subLabel, cx, h - 14);
+        });
+
+        requestAnimationFrame(drawLab);
+      }
+
+      // Button Handlers
+      btnStep1.addEventListener('click', function () {
+        state.hasLiquid = true;
+        btnStep1.classList.add('done');
+        btnStep1.disabled = true;
+        btnStep2.disabled = false;
+        statusBadge.textContent = 'Step 2: Add Elodea plants to Tubes 3 & 4';
+        guideText.innerHTML = 'All 4 test tubes now contain <strong>green Bromothymol Blue (BTB)</strong> solution, showing a neutral starting level of dissolved carbon dioxide (CO₂). Next, click <strong>Step 2</strong> to add aquatic plants to Tubes 3 and 4.';
+        updateTable();
+      });
+
+      btnStep2.addEventListener('click', function () {
+        state.hasPlants = true;
+        btnStep2.classList.add('done');
+        btnStep2.disabled = true;
+        btnStep3.disabled = false;
+        statusBadge.textContent = 'Step 3: Cover Tubes 2 & 4 with dark boxes';
+        guideText.innerHTML = '<strong>Elodea</strong> sprigs are now in Tubes 3 and 4. Tubes 1 and 2 remain empty as your <strong>control tubes</strong>. Next, click <strong>Step 3</strong> to block light from Tubes 2 and 4.';
+        updateTable();
+      });
+
+      btnStep3.addEventListener('click', function () {
+        state.hasDarkBox = true;
+        btnStep3.classList.add('done');
+        btnStep3.disabled = true;
+        btnStep4.disabled = false;
+        statusBadge.textContent = 'Step 4: Turn on the grow lamp';
+        guideText.innerHTML = 'Tubes 2 and 4 are now inside <strong>light-blocking dark boxes</strong> (shown with a cutaway view so you can still observe color changes). Click <strong>Step 4</strong> to turn on the grow lamp!';
+      });
+
+      btnStep4.addEventListener('click', function () {
+        state.lampOn = true;
+        btnStep4.classList.add('done');
+        btnStep4.disabled = true;
+        btnRun24.disabled = false;
+        statusBadge.textContent = 'Ready! Click "Run 24 Hours"';
+        guideText.innerHTML = 'The grow lamp is shining! Notice oxygen bubbles already forming in <strong>Tube 3</strong>. Click <strong>▶ Run 24 Hours</strong> to fast-forward through a full day and observe the pH indicator colors.';
+      });
+
+      btnRun24.addEventListener('click', function () {
+        if (state.running || state.hours >= 24) return;
+        state.running = true;
+        btnRun24.disabled = true;
+        statusBadge.textContent = 'Running 24-hour experiment...';
+
+        animInterval = setInterval(function () {
+          state.hours += 1;
+          clockDisplay.textContent = state.hours + (state.hours === 1 ? ' Hour' : ' Hours');
+          updateTable();
+
+          if (state.hours >= 24) {
+            clearInterval(animInterval);
+            state.running = false;
+            statusBadge.textContent = 'Experiment Complete (24 Hours)';
+            guideText.innerHTML = '<strong>24-Hour Results:</strong><br>• <strong>Tubes 1 & 2 (Controls):</strong> Stayed <strong>green</strong>—without a plant, CO₂ levels never changed.<br>• <strong>Tube 3 (Plant in Light):</strong> Turned <strong>blue</strong> because photosynthesis absorbed CO₂ faster than cellular respiration released it.<br>• <strong>Tube 4 (Plant in Dark):</strong> Turned <strong>yellow</strong> because photosynthesis stopped without light, while cellular respiration continued releasing CO₂!';
+          }
+        }, 160);
+      });
+
+      btnReset.addEventListener('click', function () {
+        if (animInterval) clearInterval(animInterval);
+        state.hasLiquid = false;
+        state.hasPlants = false;
+        state.hasDarkBox = false;
+        state.lampOn = false;
+        state.hours = 0;
+        state.running = false;
+        bubbles = [];
+
+        clockDisplay.textContent = '0 Hours';
+        statusBadge.textContent = 'Step 1: Set up the test tubes';
+        guideText.innerHTML = 'Follow <strong>Steps 1–4</strong> above to prepare your experiment. Tubes 1 and 2 have <strong>no plants</strong> (they are your controls). Tubes 3 and 4 contain aquatic <em>Elodea</em> plants—one in the light and one blocked from light!';
+
+        btnStep1.disabled = false;
+        btnStep1.classList.remove('done');
+        btnStep2.disabled = true;
+        btnStep2.classList.remove('done');
+        btnStep3.disabled = true;
+        btnStep3.classList.remove('done');
+        btnStep4.disabled = true;
+        btnStep4.classList.remove('done');
+        btnRun24.disabled = true;
+
+        updateTable();
+      });
+
+      // Quiz Handler
+      document.getElementById('btnCheckAnswers').addEventListener('click', function () {
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const q3 = document.querySelector('input[name="q3"]:checked');
+
+        const f1 = document.getElementById('q1Feedback');
+        const f2 = document.getElementById('q2Feedback');
+        const f3 = document.getElementById('q3Feedback');
+
+        f1.style.display = 'block';
+        if (!q1) {
+          f1.textContent = 'Please select an answer for Question 1.';
+          f1.style.color = '#b45309';
+        } else if (q1.value === 'a') {
+          f1.textContent = '✓ Correct! In bright light, photosynthesis removes CO₂ faster than respiration produces it, turning BTB blue.';
+          f1.style.color = '#047857';
+        } else {
+          f1.textContent = '✗ Not quite—remember BTB turns blue when CO₂ is removed from the water.';
+          f1.style.color = '#be123c';
+        }
+
+        f2.style.display = 'block';
+        if (!q2) {
+          f2.textContent = 'Please select an answer for Question 2.';
+          f2.style.color = '#b45309';
+        } else if (q2.value === 'a') {
+          f2.textContent = '✓ Correct! Plants do cellular respiration 24/7. Without light for photosynthesis, CO₂ builds up and turns BTB yellow.';
+          f2.style.color = '#047857';
+        } else {
+          f2.textContent = '✗ Check the equations at the top: cellular respiration releases CO₂ even in the dark.';
+          f2.style.color = '#be123c';
+        }
+
+        f3.style.display = 'block';
+        if (!q3) {
+          f3.textContent = 'Please select an answer for Question 3.';
+          f3.style.color = '#b45309';
+        } else if (q3.value === 'a') {
+          f3.textContent = '✓ Correct! Controls prove the Elodea plants caused the CO₂ and color changes.';
+          f3.style.color = '#047857';
+        } else {
+          f3.textContent = '✗ Think about why scientists include tubes without the organism being tested.';
+          f3.style.color = '#be123c';
+        }
+      });
+
+      // Start render loop
+      requestAnimationFrame(drawLab);
+    })();
+  </script>
+</body>
+</html>
