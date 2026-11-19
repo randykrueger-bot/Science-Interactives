@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photosynthesis Lab Companion: Chloroplasts & Food</title>
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Load Google Font: Inter & Plus Jakarta Sans for clean 7th-grade readability -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            forest: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            sun: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      #summaryModal {
+        position: static !important;
+        background: white !important;
+        padding: 0 !important;
+      }
+      #summaryModalContent {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-forest-200 selection:text-forest-900">
+
+  <!-- Top Header Banner -->
+  <header class="bg-gradient-to-r from-forest-900 via-forest-800 to-emerald-800 text-white shadow-lg no-print">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-forest-700/80 border border-forest-500/40 text-forest-100 text-xs font-semibold tracking-wide uppercase">
+            <span>🌱 7th Grade Life Science</span>
+            <span>•</span>
+            <span>Matter Cycling</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+            Photosynthesis Lab Companion
+          </h1>
+          <p class="text-forest-100 text-sm sm:text-base max-w-2xl">
+            Investigating Matter &amp; Energy Inside a Plant Cell using the <span class="font-semibold text-amber-300">Chloroplasts and Food</span> simulation.
+          </p>
+        </div>
+
+        <!-- Direct Launch Button -->
+        <div class="flex flex-col items-start md:items-end gap-2 shrink-0">
+          <a
+            href="https://www.netlogoweb.org/launch#https://www.netlogoweb.org/assets/modelslib/Sample%20Models/Biology/Chloroplasts%20and%20Food.nlogo"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group inline-flex items-center gap-3 bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-900 font-bold px-5 py-3.5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-150 text-sm sm:text-base"
+          >
+            <span>🚀 Launch NetLogo Simulation</span>
+            <svg class="w-5 h-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </a>
+          <span class="text-xs text-forest-200">Opens in a new tab so you can view both side-by-side!</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+
+    <!-- Lab Checklist Progress Card -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900">Your Simulation Investigation Progress</h2>
+          <p class="text-xs sm:text-sm text-slate-600">Check off each step below as you test the NetLogo model.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-44 sm:w-56 h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div id="progressBar" class="h-full bg-forest-500 transition-all duration-300 rounded-full" style="width: 0%"></div>
+          </div>
+          <span id="progressText" class="text-sm font-bold text-forest-700 shrink-0">0 / 4 Steps</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Molecule Legend -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+            <span>🔬 Simulation Molecule Key</span>
+          </h2>
+          <p class="text-sm text-slate-600">Use this key to identify the particles moving around inside the simulation.</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 text-xs font-semibold bg-forest-50 text-forest-800 border border-forest-200 px-3 py-1.5 rounded-xl">
+          <span class="w-3 h-3 rounded-full bg-green-600 inline-block"></span>
+          Green Circles = Chloroplasts
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <!-- Water -->
+        <div class="bg-sky-50/70 border border-sky-200 rounded-xl p-3.5 flex flex-col items-center text-center">
+          <div class="h-12 flex items-center justify-center mb-2">
+            <!-- SVG Water Molecule: 1 Red (O) + 2 White (H) -->
+            <svg width="52" height="40" viewBox="0 0 52 40" aria-label="Water molecule">
+              <circle cx="15" cy="26" r="7" fill="#ffffff" stroke="#64748b" stroke-width="2" />
+              <circle cx="37" cy="26" r="7" fill="#ffffff" stroke="#64748b" stroke-width="2" />
+              <circle cx="26" cy="16" r="10" fill="#dc2626" />
+            </svg>
+          </div>
+          <div class="font-bold text-slate-900 text-sm">Water (H₂O)</div>
+          <div class="text-xs text-slate-600 mt-0.5">1 red + 2 white atoms</div>
+        </div>
+
+        <!-- Carbon Dioxide -->
+        <div class="bg-slate-100/80 border border-slate-200 rounded-xl p-3.5 flex flex-col items-center text-center">
+          <div class="h-12 flex items-center justify-center mb-2">
+            <!-- SVG CO2 Molecule: 1 Black (C) + 2 Red (O) -->
+            <svg width="64" height="40" viewBox="0 0 64 40" aria-label="Carbon dioxide molecule">
+              <circle cx="16" cy="20" r="9" fill="#dc2626" />
+              <circle cx="48" cy="20" r="9" fill="#dc2626" />
+              <circle cx="32" cy="20" r="10" fill="#1e293b" />
+            </svg>
+          </div>
+          <div class="font-bold text-slate-900 text-sm">Carbon Dioxide (CO₂)</div>
+          <div class="text-xs text-slate-600 mt-0.5">1 black + 2 red atoms</div>
+        </div>
+
+        <!-- Light Energy -->
+        <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 flex flex-col items-center text-center">
+          <div class="h-12 flex items-center justify-center mb-2">
+            <!-- SVG Light Photon -->
+            <svg width="56" height="40" viewBox="0 0 56 40" aria-label="Light ray">
+              <path d="M6 20 L16 14 L24 26 L34 14 L44 22" fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+              <polygon points="48,22 40,16 41,27" fill="#f59e0b" />
+            </svg>
+          </div>
+          <div class="font-bold text-slate-900 text-sm">Light Energy</div>
+          <div class="text-xs text-slate-600 mt-0.5">Yellow rays / photons</div>
+        </div>
+
+        <!-- Oxygen -->
+        <div class="bg-rose-50/70 border border-rose-200 rounded-xl p-3.5 flex flex-col items-center text-center">
+          <div class="h-12 flex items-center justify-center mb-2">
+            <!-- SVG O2 Molecule: 2 Red atoms -->
+            <svg width="52" height="40" viewBox="0 0 52 40" aria-label="Oxygen molecule">
+              <circle cx="19" cy="20" r="9.5" fill="#dc2626" />
+              <circle cx="33" cy="20" r="9.5" fill="#dc2626" />
+            </svg>
+          </div>
+          <div class="font-bold text-slate-900 text-sm">Oxygen (O₂)</div>
+          <div class="text-xs text-slate-600 mt-0.5">2 red atoms joined</div>
+        </div>
+
+        <!-- Glucose (Sugar) -->
+        <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3.5 flex flex-col items-center text-center">
+          <div class="h-12 flex items-center justify-center mb-2">
+            <!-- SVG Glucose Ring / 6-carbon chain -->
+            <svg width="64" height="40" viewBox="0 0 64 40" aria-label="Glucose sugar molecule">
+              <polygon points="32,7 44,14 44,26 32,33 20,26 20,14" fill="none" stroke="#059669" stroke-width="2.5" />
+              <circle cx="32" cy="7" r="4.5" fill="#1e293b" />
+              <circle cx="44" cy="14" r="4.5" fill="#1e293b" />
+              <circle cx="44" cy="26" r="4.5" fill="#1e293b" />
+              <circle cx="32" cy="33" r="4.5" fill="#1e293b" />
+              <circle cx="20" cy="26" r="4.5" fill="#1e293b" />
+              <circle cx="20" cy="14" r="4.5" fill="#1e293b" />
+            </svg>
+          </div>
+          <div class="font-bold text-slate-900 text-sm">Glucose / Sugar</div>
+          <div class="text-xs text-slate-600 mt-0.5">6-carbon food molecule made inside chloroplast</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Part 1: Step-by-Step Lab Directions -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-7">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-8 h-8 rounded-xl bg-forest-600 text-white font-bold flex items-center justify-center text-sm">1</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Step-by-Step Lab Directions</h2>
+      </div>
+      <p class="text-slate-600 text-sm sm:text-base mb-6">
+        Follow each step in the NetLogo simulation. Click the checkbox on each card after you finish observing!
+      </p>
+
+      <div class="space-y-4" id="stepsContainer">
+        <!-- Step 1 -->
+        <div class="step-card border-2 border-slate-200 rounded-2xl p-4 sm:p-5 transition-all hover:border-forest-300 bg-white" data-step="1">
+          <label class="flex items-start gap-4 cursor-pointer select-none">
+            <input type="checkbox" class="step-checkbox mt-1 w-6 h-6 rounded-lg text-forest-600 border-slate-300 focus:ring-forest-500 cursor-pointer shrink-0" />
+            <div class="space-y-1.5 flex-1">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-bold text-base sm:text-lg text-slate-900">Step 1: Launch &amp; Explore the Cell</span>
+                <span class="step-badge text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">To Do</span>
+              </div>
+              <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                Open the simulation using the yellow button at the top. Press <span class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-xs font-bold text-slate-800">SETUP/RESET</span> and look at the large green circles (chloroplasts). Use the <strong>Molecule Key</strong> above to spot the floating water and carbon dioxide molecules around them.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card border-2 border-slate-200 rounded-2xl p-4 sm:p-5 transition-all hover:border-forest-300 bg-white" data-step="2">
+          <label class="flex items-start gap-4 cursor-pointer select-none">
+            <input type="checkbox" class="step-checkbox mt-1 w-6 h-6 rounded-lg text-forest-600 border-slate-300 focus:ring-forest-500 cursor-pointer shrink-0" />
+            <div class="space-y-1.5 flex-1">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-bold text-base sm:text-lg text-slate-900">Step 2: Run the Normal Simulation</span>
+                <span class="step-badge text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">To Do</span>
+              </div>
+              <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                Make sure the <strong>Light</strong>, <strong>Water</strong>, and <strong>Carbon Dioxide</strong> sliders are turned up (default settings), then press <span class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-xs font-bold text-slate-800">GO/PAUSE</span>. Watch closely for 30 seconds: What goes <em>into</em> the green chloroplasts, and what new molecules come <em>out</em>? Also look at the <strong>"Number of Molecules"</strong> graph on the right.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card border-2 border-slate-200 rounded-2xl p-4 sm:p-5 transition-all hover:border-forest-300 bg-white" data-step="3">
+          <label class="flex items-start gap-4 cursor-pointer select-none">
+            <input type="checkbox" class="step-checkbox mt-1 w-6 h-6 rounded-lg text-forest-600 border-slate-300 focus:ring-forest-500 cursor-pointer shrink-0" />
+            <div class="space-y-1.5 flex-1">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-bold text-base sm:text-lg text-slate-900">Step 3: Test "No Sunlight" (Energy Input)</span>
+                <span class="step-badge text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">To Do</span>
+              </div>
+              <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                Press <span class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-xs font-bold text-slate-800">GO/PAUSE</span> to pause the model. Slide <strong>Light</strong> all the way down to <strong>0</strong>, press <span class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-xs font-bold text-slate-800">SETUP/RESET</span>, and press <span class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-xs font-bold text-slate-800">GO/PAUSE</span> again. Observe whether any sugar (glucose) or oxygen is made without light energy.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card border-2 border-slate-200 rounded-2xl p-4 sm:p-5 transition-all hover:border-forest-300 bg-white" data-step="4">
+          <label class="flex items-start gap-4 cursor-pointer select-none">
+            <input type="checkbox" class="step-checkbox mt-1 w-6 h-6 rounded-lg text-forest-600 border-slate-300 focus:ring-forest-500 cursor-pointer shrink-0" />
+            <div class="space-y-1.5 flex-1">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-bold text-base sm:text-lg text-slate-900">Step 4: Test Missing Matter (Water or Carbon Dioxide)</span>
+                <span class="step-badge text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">To Do</span>
+              </div>
+              <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                Pause the model. Turn <strong>Light</strong> back up, then set either <strong>Carbon Dioxide</strong> or <strong>Water</strong> down to <strong>0</strong>. Press <span class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-xs font-bold text-slate-800">SETUP/RESET</span> and <span class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-xs font-bold text-slate-800">GO/PAUSE</span>. Watch what happens inside the chloroplasts when one of the starting ingredients is missing.
+              </p>
+            </div>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Part 2: Check-for-Understanding Questions -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-7 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <span class="w-8 h-8 rounded-xl bg-amber-500 text-slate-900 font-bold flex items-center justify-center text-sm">2</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Check Your Understanding (5 Questions)</h2>
+          </div>
+          <p class="text-slate-600 text-sm sm:text-base">
+            Use evidence from your simulation observations to answer the 5 questions below. Click an answer to get instant feedback!
+          </p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <span id="quizScoreBadge" class="px-3.5 py-2 rounded-xl bg-forest-50 border border-forest-200 text-forest-800 text-sm font-bold">
+            Score: 0 / 5
+          </span>
+          <button
+            type="button"
+            id="resetQuizBtn"
+            class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+          >
+            🔄 Reset Quiz
+          </button>
+        </div>
+      </div>
+
+      <!-- Multiple Choice Questions Container (All 5 Questions) -->
+      <div id="quizContainer" class="space-y-6"></div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-5xl mx-auto px-4 sm:px-6 pb-10 text-center text-xs text-slate-500">
+    Designed for 7th Grade Science • Pairs with OpenSciEd / NetLogo <em>Chloroplasts and Food</em> Simulation
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // 1. Multiple Choice Questions Data (7th Grade Level - All 5 Questions)
+    const quizQuestions = [
+      {
+        id: 1,
+        tag: "Question 1 • Inputs",
+        prompt: "Based on your observations in Step 2, which three things must enter or hit the chloroplast for photosynthesis to happen?",
+        options: [
+          { letter: "A", text: "Oxygen, glucose, and soil" },
+          { letter: "B", text: "Water, carbon dioxide, and light energy" },
+          { letter: "C", text: "Sugar, light energy, and oxygen" },
+          { letter: "D", text: "Carbon dioxide, oxygen, and water" }
+        ],
+        correctLetter: "B",
+        explanation: "Spot on! In the simulation, water (H₂O) and carbon dioxide (CO₂) molecules enter the green chloroplast, and yellow light rays provide the energy needed to start the reaction."
+      },
+      {
+        id: 2,
+        tag: "Question 2 • Outputs",
+        prompt: "When the simulation runs with plenty of light, water, and carbon dioxide, what two new substances (outputs) are produced by the chloroplast?",
+        options: [
+          { letter: "A", text: "Water and Carbon Dioxide" },
+          { letter: "B", text: "Glucose (sugar) and Oxygen" },
+          { letter: "C", text: "Light and Chlorophyll" },
+          { letter: "D", text: "Carbon Dioxide and Oxygen" }
+        ],
+        correctLetter: "B",
+        explanation: "Awesome job! Inside the chloroplast, atoms from water and carbon dioxide are rearranged to build 6-carbon glucose (sugar) molecules for food and oxygen (O₂) molecules that float out."
+      },
+      {
+        id: 3,
+        tag: "Question 3 • Graph & Molecule Tracking",
+        prompt: "Look at the \"Number of Molecules\" graph while photosynthesis is running smoothly. How do the amounts of Carbon Dioxide and Oxygen change over time?",
+        options: [
+          { letter: "A", text: "Carbon dioxide goes UP and oxygen goes DOWN" },
+          { letter: "B", text: "Both carbon dioxide and oxygen stay completely flat" },
+          { letter: "C", text: "Carbon dioxide goes DOWN as it gets used up, while oxygen goes UP as it is produced" },
+          { letter: "D", text: "Both carbon dioxide and oxygen disappear completely" }
+        ],
+        correctLetter: "C",
+        explanation: "Exactly right! Because chloroplasts use up carbon dioxide as an input and release oxygen as an output, the carbon dioxide line drops while the oxygen line climbs."
+      },
+      {
+        id: 4,
+        tag: "Question 4 • Experimental Evidence",
+        prompt: "In Step 3, when you set Light to 0, what happened inside the chloroplasts and why?",
+        options: [
+          { letter: "A", text: "Photosynthesis sped up because plants prefer the dark" },
+          { letter: "B", text: "No glucose or oxygen was made because light provides the energy needed to rearrange water and carbon dioxide" },
+          { letter: "C", text: "Water turned directly into glucose without carbon dioxide" },
+          { letter: "D", text: "The chloroplasts multiplied" }
+        ],
+        correctLetter: "B",
+        explanation: "Great scientific reasoning! Even when water and carbon dioxide molecules bump into the chloroplast, no chemical reaction happens without light energy to power it."
+      },
+      {
+        id: 5,
+        tag: "Question 5 • Big Picture Summary",
+        prompt: "Which statement best summarizes the overall process of photosynthesis inside a plant cell's chloroplasts?",
+        options: [
+          { letter: "A", text: "Chloroplasts use light energy to turn water and carbon dioxide into food (glucose) and oxygen." },
+          { letter: "B", text: "Chloroplasts break down glucose and oxygen to create water and sunlight." },
+          { letter: "C", text: "Chloroplasts absorb oxygen from the air and release carbon dioxide into the soil." },
+          { letter: "D", text: "Chloroplasts store water and carbon dioxide without changing them into new molecules." }
+        ],
+        correctLetter: "A",
+        explanation: "Nailed it! Photosynthesis takes in water, carbon dioxide, and light energy inside the chloroplasts and rearranges those atoms to produce glucose (food for the plant) and oxygen."
+      }
+    ];
+
+    // Track student selections
+    let userAnswers = {};
+
+    // Update live quiz score display
+    function updateScoreBadge() {
+      let correctCount = 0;
+      quizQuestions.forEach((q) => {
+        if (userAnswers[q.id] === q.correctLetter) {
+          correctCount++;
+        }
+      });
+      const badge = document.getElementById("quizScoreBadge");
+      if (badge) {
+        badge.textContent = `Score: ${correctCount} / ${quizQuestions.length}`;
+      }
+    }
+
+    // Render Multiple-Choice Questions
+    function renderQuiz() {
+      const container = document.getElementById("quizContainer");
+      container.innerHTML = "";
+      updateScoreBadge();
+
+      quizQuestions.forEach((q) => {
+        const card = document.createElement("div");
+        card.className = "border border-slate-200 rounded-2xl p-5 sm:p-6 bg-slate-50/40 space-y-4";
+        card.id = `question-card-${q.id}`;
+
+        const optionsHtml = q.options
+          .map(
+            (opt) => `
+            <button
+              type="button"
+              onclick="selectOption(${q.id}, '${opt.letter}')"
+              id="q${q.id}-opt-${opt.letter}"
+              class="option-btn w-full text-left p-3.5 sm:p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-forest-400 hover:bg-forest-50/40 transition-all flex items-start gap-3 cursor-pointer"
+            >
+              <span class="opt-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
+                ${opt.letter}
+              </span>
+              <span class="text-sm sm:text-base text-slate-800 font-medium leading-snug">${opt.text}</span>
+            </button>
+          `
+          )
+          .join("");
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-200/80 text-slate-700">
+              ${q.tag}
+            </span>
+            <span id="q${q.id}-status" class="text-xs font-bold text-slate-400">Not answered</span>
+          </div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+            ${q.id}. ${q.prompt}
+          </h3>
+          <div class="grid grid-cols-1 gap-2.5">
+            ${optionsHtml}
+          </div>
+          <div id="q${q.id}-feedback" class="hidden rounded-xl p-4 text-sm leading-relaxed border"></div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Handle Option Selection & Instant Feedback
+    window.selectOption = function (questionId, chosenLetter) {
+      const question = quizQuestions.find((item) => item.id === questionId);
+      if (!question) return;
+
+      userAnswers[questionId] = chosenLetter;
+      const isCorrect = chosenLetter === question.correctLetter;
+
+      // Reset all option styles for this question
+      question.options.forEach((opt) => {
+        const btn = document.getElementById(`q${questionId}-opt-${opt.letter}`);
+        const badge = btn.querySelector(".opt-letter");
+        btn.className =
+          "option-btn w-full text-left p-3.5 sm:p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-forest-400 transition-all flex items-start gap-3 cursor-pointer";
+        badge.className =
+          "opt-letter w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5";
+      });
+
+      // Highlight selected option
+      const selectedBtn = document.getElementById(`q${questionId}-opt-${chosenLetter}`);
+      const selectedBadge = selectedBtn.querySelector(".opt-letter");
+      const feedbackBox = document.getElementById(`q${questionId}-feedback`);
+      const statusTag = document.getElementById(`q${questionId}-status`);
+
+      if (isCorrect) {
+        selectedBtn.className =
+          "option-btn w-full text-left p-3.5 sm:p-4 rounded-xl border-2 border-forest-500 bg-forest-50 transition-all flex items-start gap-3 cursor-pointer";
+        selectedBadge.className =
+          "opt-letter w-7 h-7 rounded-lg bg-forest-600 text-white font-bold text-sm flex items-center justify-center shrink-0 mt-0.5";
+        statusTag.textContent = "✅ Correct";
+        statusTag.className = "text-xs font-bold text-forest-700";
+
+        feedbackBox.className =
+          "rounded-xl p-4 text-sm leading-relaxed border bg-forest-50 border-forest-300 text-forest-900";
+        feedbackBox.innerHTML = `<strong>Correct!</strong> ${question.explanation}`;
+      } else {
+        selectedBtn.className =
+          "option-btn w-full text-left p-3.5 sm:p-4 rounded-xl border-2 border-rose-400 bg-rose-50 transition-all flex items-start gap-3 cursor-pointer";
+        selectedBadge.className =
+          "opt-letter w-7 h-7 rounded-lg bg-rose-600 text-white font-bold text-sm flex items-center justify-center shrink-0 mt-0.5";
+        statusTag.textContent = "❌ Try Again";
+        statusTag.className = "text-xs font-bold text-rose-600";
+
+        feedbackBox.className =
+          "rounded-xl p-4 text-sm leading-relaxed border bg-rose-50 border-rose-200 text-rose-900";
+        feedbackBox.innerHTML = `<strong>Not quite!</strong> Look back at your simulation observations and try selecting another choice.`;
+      }
+
+      feedbackBox.classList.remove("hidden");
+      updateScoreBadge();
+    };
+
+    // 2. Step-by-Step Lab Checklist Logic
+    function setupStepChecklist() {
+      const checkboxes = document.querySelectorAll(".step-checkbox");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+
+      function updateProgress() {
+        const total = checkboxes.length;
+        let completed = 0;
+
+        checkboxes.forEach((cb) => {
+          const card = cb.closest(".step-card");
+          const badge = card.querySelector(".step-badge");
+          if (cb.checked) {
+            completed++;
+            card.classList.remove("border-slate-200", "bg-white");
+            card.classList.add("border-forest-400", "bg-forest-50/40");
+            badge.textContent = "✓ Completed";
+            badge.className =
+              "step-badge text-xs font-bold px-2.5 py-1 rounded-full bg-forest-100 text-forest-800";
+          } else {
+            card.classList.remove("border-forest-400", "bg-forest-50/40");
+            card.classList.add("border-slate-200", "bg-white");
+            badge.textContent = "To Do";
+            badge.className =
+              "step-badge text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600";
+          }
+        });
+
+        const pct = Math.round((completed / total) * 100);
+        progressBar.style.width = `${pct}%`;
+        progressText.textContent = `${completed} / ${total} Steps`;
+      }
+
+      checkboxes.forEach((cb) => cb.addEventListener("change", updateProgress));
+    }
+
+    // Initialize App
+    window.addEventListener("DOMContentLoaded", () => {
+      renderQuiz();
+      setupStepChecklist();
+
+      const resetBtn = document.getElementById("resetQuizBtn");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          userAnswers = {};
+          renderQuiz();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
