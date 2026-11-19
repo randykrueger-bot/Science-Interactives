@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 4: How Does Distance From the Light Source Affect the Rate of Photosynthesis?</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Custom Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 10px;
+      border-radius: 9999px;
+      background: #cbd5e1;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f59e0b;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.5);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.12);
+    }
+
+    .lcd-screen {
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+
+    #bench-canvas {
+      cursor: ew-resize;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Lab Header -->
+  <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-emerald-900 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-3 text-center sm:text-left">
+        <div class="w-11 h-11 rounded-2xl bg-amber-400/20 border border-amber-300/30 flex items-center justify-center text-2xl shrink-0">
+          🔦
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-amber-300">LabXchange Virtual Investigation • Lab 4 of 4</div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
+            How Does Distance From the Light Source Affect the Rate of Photosynthesis?
+          </h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-xs font-semibold text-amber-100">
+          6CO<sub>2</sub> + 6H<sub>2</sub>O + Light &rarr; C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> + 6O<sub>2</sub>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 flex flex-col gap-4">
+
+    <!-- Investigation Objective & BTB pH Reference Bar -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+      <div class="flex items-start sm:items-center gap-2.5">
+        <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 font-extrabold text-xs uppercase shrink-0">
+          Experiment
+        </span>
+        <p class="text-xs sm:text-sm text-slate-700 leading-snug">
+          Drag the <strong>LED Light</strong> along the ruler track (or use the slider) from <strong>Near (10 cm)</strong> to <strong>Far (100 cm)</strong>. Observe how light intensity, O<sub>2</sub> bubbles, and Bromothymol Blue pH respond!
+        </p>
+      </div>
+      <button onclick="resetLab()" class="px-3.5 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shrink-0 transition">
+        ↺ Reset Lab
+      </button>
+    </section>
+
+    <!-- Primary Simulation Grid: Left = Ruler Track Apparatus, Right = Live Inverse Graph -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+      <!-- LEFT (7 cols): Interactive Metric Ruler Track & Elodea Apparatus -->
+      <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between gap-3.5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-base">1. Metric Ruler Bench &amp; Movable LED Light</h2>
+            <p class="text-xs text-slate-500">Tip: Click or drag directly inside the lab bench to slide the LED lamp!</p>
+          </div>
+          <span id="distance-zone-badge" class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-xs">
+            Near Light (High Intensity)
+          </span>
+        </div>
+
+        <!-- Lab Bench Canvas -->
+        <div id="bench-canvas-wrapper" class="relative w-full h-[310px] sm:h-[330px] rounded-2xl bg-slate-950 border-2 border-slate-700 overflow-hidden">
+          <canvas id="bench-canvas" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- Digital Sensor Dashboard Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="lcd-screen rounded-xl bg-slate-900 border border-slate-700 p-2.5">
+            <div class="text-[10px] font-bold uppercase text-amber-400">Light Distance</div>
+            <div id="readout-distance" class="text-lg sm:text-xl font-black text-white">10 cm</div>
+          </div>
+
+          <div class="lcd-screen rounded-xl bg-slate-900 border border-slate-700 p-2.5">
+            <div class="text-[10px] font-bold uppercase text-yellow-300">Light Intensity</div>
+            <div id="readout-intensity" class="text-lg sm:text-xl font-black text-yellow-200">100%</div>
+          </div>
+
+          <div class="lcd-screen rounded-xl bg-slate-900 border border-slate-700 p-2.5">
+            <div class="text-[10px] font-bold uppercase text-sky-400">O<sub>2</sub> Bubble Rate</div>
+            <div id="readout-bubbles" class="text-lg sm:text-xl font-black text-sky-300">48 / min</div>
+          </div>
+
+          <div class="lcd-screen rounded-xl bg-slate-900 border border-slate-700 p-2.5">
+            <div class="text-[10px] font-bold uppercase text-emerald-400">Photosynthesis Rate</div>
+            <div id="readout-rate" class="text-lg sm:text-xl font-black text-emerald-300">96%</div>
+          </div>
+        </div>
+
+        <!-- Distance Slider, Presets & Record Button -->
+        <div class="rounded-2xl bg-amber-50/80 border border-amber-200 p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label for="distance-slider" class="text-xs sm:text-sm font-extrabold text-amber-950 flex items-center gap-1.5">
+              <span>📏</span> Distance From Light Source:
+            </label>
+            <span id="slider-badge" class="px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 font-extrabold text-xs sm:text-sm">
+              10 cm (Near)
+            </span>
+          </div>
+
+          <input id="distance-slider" type="range" min="10" max="100" step="5" value="10" oninput="setDistance(this.value)" class="w-full" />
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1">
+            <!-- Quick Distance Buttons -->
+            <div class="grid grid-cols-6 gap-1 flex-1">
+              <button onclick="setDistance(10)" class="py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-slate-900 font-bold text-xs transition">10cm</button>
+              <button onclick="setDistance(20)" class="py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-slate-900 font-bold text-xs transition">20cm</button>
+              <button onclick="setDistance(40)" class="py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-slate-900 font-bold text-xs transition">40cm</button>
+              <button onclick="setDistance(60)" class="py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-slate-900 font-bold text-xs transition">60cm</button>
+              <button onclick="setDistance(80)" class="py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-slate-900 font-bold text-xs transition">80cm</button>
+              <button onclick="setDistance(100)" class="py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-slate-900 font-bold text-xs transition">100cm</button>
+            </div>
+
+            <!-- Record Data Point CTA -->
+            <button onclick="recordTrial()"
+              class="py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-1.5 shrink-0">
+              <span>📋</span> Record Data Point
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT (5 cols): Real-Time Inverse Curve Graph & BTB Indicator -->
+      <section class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between gap-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-base">2. Live Photosynthesis vs. Distance Graph</h2>
+            <p class="text-xs text-slate-500">Relative Distance (Near &rarr; Far) vs. Relative Rate (%)</p>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] font-bold">
+            <span class="inline-flex items-center gap-1 text-amber-600"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live</span>
+            <span class="inline-flex items-center gap-1 text-emerald-700"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>Logged</span>
+          </div>
+        </div>
+
+        <!-- Compact Bromothymol Blue pH Scale Bar (Matching LabXchange Preview Card) -->
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-2.5 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-extrabold text-slate-700">
+            <span>Bromothymol Blue Solution pH:</span>
+            <span id="ph-status-pill" class="px-2 py-0.5 rounded-md bg-blue-600 text-white">pH 7.8 (Blue • Low CO₂)</span>
+          </div>
+          <div class="grid grid-cols-9 rounded-lg overflow-hidden border border-slate-300 text-center text-[10px] font-extrabold">
+            <div class="py-1 bg-[#eab308] text-slate-950">6.2</div>
+            <div class="py-1 bg-[#b8d422] text-slate-950">6.5</div>
+            <div class="py-1 bg-[#84cc16] text-slate-950">6.7</div>
+            <div class="py-1 bg-[#10b981] text-white">7.0</div>
+            <div class="py-1 bg-[#0d9488] text-white">7.2</div>
+            <div class="py-1 bg-[#0284c7] text-white">7.4</div>
+            <div class="py-1 bg-[#2563eb] text-white">7.6</div>
+            <div class="py-1 bg-[#1d4ed8] text-white">7.8</div>
+            <div class="py-1 bg-[#1e3a8a] text-white">8.0</div>
+          </div>
+        </div>
+
+        <!-- Graph Canvas -->
+        <div id="graph-canvas-wrapper" class="relative w-full h-[265px] sm:h-[285px] rounded-2xl bg-slate-950 border-2 border-slate-700 overflow-hidden">
+          <canvas id="graph-canvas" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- Dynamic Science Explanation Box -->
+        <div id="science-explanation" class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950 font-medium leading-relaxed">
+          <strong>Near Light (10 cm):</strong> Light rays are concentrated directly on the Elodea leaves (100% intensity). Rapid photosynthesis absorbs CO<sub>2</sub> (turning BTB blue) and releases <strong>48 O<sub>2</sub> bubbles/min</strong>.
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Bottom Section: Recorded Data Table + 7th-Grade Checkpoint Questions -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+      <!-- Recorded Data Table (5 cols) -->
+      <section class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5">
+            <span>📊</span> 3. Distance Investigation Data Table
+          </h3>
+          <button onclick="clearDataTable()" class="text-xs font-bold text-rose-600 hover:text-rose-800 underline">
+            Clear Table
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
+                <th class="py-2.5 px-2.5">Distance</th>
+                <th class="py-2.5 px-2.5">Light %</th>
+                <th class="py-2.5 px-2.5">Bubbles/min</th>
+                <th class="py-2.5 px-2.5">BTB pH</th>
+                <th class="py-2.5 px-2.5">Rate (%)</th>
+              </tr>
+            </thead>
+            <tbody id="data-table-body" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="5" class="py-6 px-3 text-center text-slate-400 italic">
+                  Move the LED lamp to different distances and click <strong>"Record Data Point"</strong>!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3 Self-Checking 7th-Grade Checkpoint Questions (7 cols) -->
+      <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5">
+            <span>🧠</span> 4. Check Your Understanding (7th-Grade Questions)
+          </h3>
+          <span id="quiz-score-badge" class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-extrabold text-xs">
+            0 / 3 Answered
+          </span>
+        </div>
+
+        <div class="space-y-3 text-xs sm:text-sm">
+
+          <!-- Question 1 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              1. As you move the LED light farther away from the Elodea plant (from 10 cm to 80 cm), what happens to the rate of photosynthesis?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="answerQuiz(1, 'A')" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-semibold text-left transition">
+                A) It increases steadily
+              </button>
+              <button onclick="answerQuiz(1, 'B')" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-semibold text-left transition">
+                B) It drops sharply at first, then levels off near a low rate
+              </button>
+              <button onclick="answerQuiz(1, 'C')" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-semibold text-left transition">
+                C) It stays completely constant
+              </button>
+            </div>
+            <div id="q1-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              2. Why does moving a light source twice as far away (from 20 cm to 40 cm) reduce light intensity to one-fourth (25%)?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button onclick="answerQuiz(2, 'A')" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-semibold text-left transition">
+                A) Light spreads out in all directions over a larger area as distance increases (Inverse-Square Law)
+              </button>
+              <button onclick="answerQuiz(2, 'B')" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-semibold text-left transition">
+                B) The LED bulb runs out of electricity when moved to the right
+              </button>
+            </div>
+            <div id="q2-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+          <!-- Question 3 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              3. When the light is placed very far away (100 cm), what color does the Bromothymol Blue (BTB) solution shift toward, and why?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button onclick="answerQuiz(3, 'A')" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-semibold text-left transition">
+                A) Deep Blue, because the plant makes extra glucose in the dark
+              </button>
+              <button onclick="answerQuiz(3, 'B')" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-semibold text-left transition">
+                B) Yellow-Green (lower pH), because photosynthesis slows down and less CO<sub>2</sub> is removed
+              </button>
+            </div>
+            <div id="q3-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast-box" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+    <div id="toast-text" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-xl">
+      Data point recorded!
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Lab 4 Simulation State: Distance From Light Source (10 cm to 100 cm)
+     */
+    const lab = {
+      distance: 10,        // 10 cm (Near) to 100 cm (Far)
+      intensity: 100,      // % light intensity following inverse-square decay
+      rate: 96,            // Relative rate of photosynthesis (%)
+      bubblesPerMin: 48,   // O2 bubbles per minute
+      ph: 7.8,             // BTB solution pH (6.5 at low light -> 7.85 at high light)
+      isDraggingLamp: false,
+      bubbles: [],
+      recordedTrials: [],
+      quizAnswered: { 1: false, 2: false, 3: false }
+    };
+
+    const benchCanvas = document.getElementById('bench-canvas');
+    const benchCtx = benchCanvas.getContext('2d');
+    const graphCanvas = document.getElementById('graph-canvas');
+    const graphCtx = graphCanvas.getContext('2d');
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-text').textContent = msg;
+      box.classList.remove('opacity-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('opacity-0'), 2000);
+    }
+
+    /**
+     * Physics & Biology Model:
+     * Light intensity decays inversely with distance squared: I ~ 1 / d^2
+     * Normalized so 10 cm = 100% intensity, 20 cm = 25%, 40 cm = 6.25%, etc.
+     * Photosynthesis rate follows light intensity with a small baseline cellular respiration offset.
+     */
+    function calculateMetricsFromDistance(distCm) {
+      // Smooth inverse-square curve scaled cleanly for 7th-grade investigation
+      const intensity = Math.max(2, Math.min(100, Math.round(100 * Math.pow(15 / (distCm + 5), 1.65))));
+      const rate = Math.max(4, Math.min(96, Math.round(4 + 92 * Math.pow(16 / (distCm + 6), 1.5))));
+      const bubblesPerMin = Math.round(2 + (rate / 100) * 48);
+      const ph = +(6.45 + (rate / 100) * 1.4).toFixed(2);
+      return { intensity, rate, bubblesPerMin, ph };
+    }
+
+    /**
+     * Map pH value to BTB solution liquid color & pill badge
+     */
+    function getBTBStyle(ph) {
+      if (ph < 6.75) {
+        return {
+          liquidRGBA: 'rgba(184, 212, 34, 0.72)',
+          label: `pH ${ph.toFixed(1)} (Yellow-Green • Higher CO₂)`,
+          pillClass: 'bg-lime-500 text-slate-950'
+        };
+      } else if (ph < 7.3) {
+        return {
+          liquidRGBA: 'rgba(16, 185, 129, 0.72)',
+          label: `pH ${ph.toFixed(1)} (Green • Moderate CO₂)`,
+          pillClass: 'bg-emerald-600 text-white'
+        };
+      } else {
+        return {
+          liquidRGBA: 'rgba(37, 99, 235, 0.76)',
+          label: `pH ${ph.toFixed(1)} (Blue • Low CO₂)`,
+          pillClass: 'bg-blue-600 text-white'
+        };
+      }
+    }
+
+    /**
+     * Set LED distance (10 to 100 cm) and refresh all displays & graph
+     */
+    function setDistance(val) {
+      lab.distance = Math.max(10, Math.min(100, Math.round(Number(val))));
+      document.getElementById('distance-slider').value = lab.distance;
+
+      const metrics = calculateMetricsFromDistance(lab.distance);
+      lab.intensity = metrics.intensity;
+      lab.rate = metrics.rate;
+      lab.bubblesPerMin = metrics.bubblesPerMin;
+      lab.ph = metrics.ph;
+
+      // Update labels & digital readouts
+      let zoneText = 'Near';
+      if (lab.distance >= 70) zoneText = 'Far';
+      else if (lab.distance >= 35) zoneText = 'Medium';
+
+      document.getElementById('slider-badge').textContent = `${lab.distance} cm (${zoneText})`;
+      document.getElementById('readout-distance').textContent = `${lab.distance} cm`;
+      document.getElementById('readout-intensity').textContent = `${lab.intensity}%`;
+      document.getElementById('readout-bubbles').textContent = `${lab.bubblesPerMin} / min`;
+      document.getElementById('readout-rate').textContent = `${lab.rate}%`;
+
+      const btb = getBTBStyle(lab.ph);
+      const phPill = document.getElementById('ph-status-pill');
+      phPill.textContent = btb.label;
+      phPill.className = `px-2 py-0.5 rounded-md ${btb.pillClass}`;
+
+      const zoneBadge = document.getElementById('distance-zone-badge');
+      const expBox = document.getElementById('science-explanation');
+
+      if (lab.distance <= 25) {
+        zoneBadge.className = 'px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-xs';
+        zoneBadge.textContent = 'Near Light (High Intensity)';
+        expBox.className = 'p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>Near Light (${lab.distance} cm):</strong> Light energy is concentrated directly on the Elodea leaves (<strong>${lab.intensity}% intensity</strong>). Rapid photosynthesis absorbs CO<sub>2</sub> (turning BTB blue) and produces <strong>${lab.bubblesPerMin} O<sub>2</sub> bubbles/min</strong>.`;
+      } else if (lab.distance <= 60) {
+        zoneBadge.className = 'px-2.5 py-1 rounded-full bg-sky-100 text-sky-900 font-bold text-xs';
+        zoneBadge.textContent = 'Medium Distance (Spreading Light)';
+        expBox.className = 'p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs sm:text-sm text-sky-950 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>Medium Distance (${lab.distance} cm):</strong> As the lamp moves farther away, light rays spread out over a wider area—dropping light intensity to <strong>${lab.intensity}%</strong> and slowing photosynthesis to <strong>${lab.rate}%</strong>.`;
+      } else {
+        zoneBadge.className = 'px-2.5 py-1 rounded-full bg-slate-200 text-slate-800 font-bold text-xs';
+        zoneBadge.textContent = 'Far Light (Low Intensity)';
+        expBox.className = 'p-3 rounded-xl bg-slate-100 border border-slate-300 text-xs sm:text-sm text-slate-900 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>Far Distance (${lab.distance} cm):</strong> Very little light reaches the test tube (only <strong>${lab.intensity}% intensity</strong>). Light is now the <strong>limiting factor</strong>, so photosynthesis slows to <strong>${lab.rate}%</strong> (${lab.bubblesPerMin} bubbles/min).`;
+      }
+
+      drawInverseGraph();
+    }
+
+    /**
+     * Resize Canvases cleanly on window load & resize
+     */
+    function resizeCanvases() {
+      const benchWrap = document.getElementById('bench-canvas-wrapper');
+      if (benchWrap) {
+        benchCanvas.width = benchWrap.clientWidth;
+        benchCanvas.height = benchWrap.clientHeight;
+      }
+      const graphWrap = document.getElementById('graph-canvas-wrapper');
+      if (graphWrap) {
+        graphCanvas.width = graphWrap.clientWidth;
+        graphCanvas.height = graphWrap.clientHeight;
+      }
+      drawInverseGraph();
+    }
+
+    /**
+     * Helper to map canvas X coordinate <-> Distance (10 to 100 cm)
+     */
+    function getTrackGeometry(w) {
+      const tubeCenterX = Math.max(66, w * 0.16);
+      const trackStartX = tubeCenterX + 68; // corresponds to 10 cm
+      const trackEndX = w - 48;             // corresponds to 100 cm
+      return { tubeCenterX, trackStartX, trackEndX };
+    }
+
+    function distanceToCanvasX(distCm, w) {
+      const { trackStartX, trackEndX } = getTrackGeometry(w);
+      const ratio = (distCm - 10) / 90;
+      return trackStartX + ratio * (trackEndX - trackStartX);
+    }
+
+    function canvasXToDistance(mouseX, w) {
+      const { trackStartX, trackEndX } = getTrackGeometry(w);
+      const clamped = Math.max(trackStartX, Math.min(trackEndX, mouseX));
+      const ratio = (clamped - trackStartX) / (trackEndX - trackStartX);
+      const rawDist = 10 + ratio * 90;
+      return Math.round(rawDist / 5) * 5; // snap to 5 cm ruler increments
+    }
+
+    /**
+     * Interactive Pointer/Touch Dragging directly on the Lab Bench Canvas
+     */
+    function handleBenchPointer(clientX) {
+      const rect = benchCanvas.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const newDist = canvasXToDistance(x, benchCanvas.width);
+      setDistance(newDist);
+    }
+
+    benchCanvas.addEventListener('mousedown', (e) => {
+      lab.isDraggingLamp = true;
+      handleBenchPointer(e.clientX);
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (lab.isDraggingLamp) handleBenchPointer(e.clientX);
+    });
+    window.addEventListener('mouseup', () => {
+      lab.isDraggingLamp = false;
+    });
+
+    benchCanvas.addEventListener('touchstart', (e) => {
+      lab.isDraggingLamp = true;
+      if (e.touches[0]) handleBenchPointer(e.touches[0].clientX);
+    }, { passive: true });
+    benchCanvas.addEventListener('touchmove', (e) => {
+      if (lab.isDraggingLamp && e.touches[0]) {
+        handleBenchPointer(e.touches[0].clientX);
+      }
+    }, { passive: true });
+    benchCanvas.addEventListener('touchend', () => {
+      lab.isDraggingLamp = false;
+    });
+
+    /**
+     * Draw Elodea Test Tube on Left, Metric Ruler Track, and Draggable LED Lamp on Right
+     */
+    function drawBenchScene() {
+      const w = benchCanvas.width;
+      const h = benchCanvas.height;
+      benchCtx.clearRect(0, 0, w, h);
+
+      // Dark lab backdrop
+      benchCtx.fillStyle = '#091124';
+      benchCtx.fillRect(0, 0, w, h);
+
+      const { tubeCenterX, trackStartX, trackEndX } = getTrackGeometry(w);
+      const lampX = distanceToCanvasX(lab.distance, w);
+      const lampY = h * 0.48;
+
+      // 1. Draw Light Cone Beam shining leftward from LED Lamp toward Elodea Test Tube
+      const intensityRatio = lab.intensity / 100;
+      const beamAlpha = 0.14 + intensityRatio * 0.52;
+      const beamGrad = benchCtx.createLinearGradient(lampX - 18, lampY, tubeCenterX - 30, lampY);
+      beamGrad.addColorStop(0, `rgba(253, 224, 71, ${beamAlpha})`);
+      beamGrad.addColorStop(0.75, `rgba(253, 224, 71, ${beamAlpha * 0.45})`);
+      beamGrad.addColorStop(1, `rgba(253, 224, 71, ${beamAlpha * 0.12})`);
+
+      benchCtx.fillStyle = beamGrad;
+      benchCtx.beginPath();
+      benchCtx.moveTo(lampX - 16, lampY - 14);
+      benchCtx.lineTo(tubeCenterX - 32, lampY - 95);
+      benchCtx.lineTo(tubeCenterX - 32, lampY + 95);
+      benchCtx.lineTo(lampX - 16, lampY + 14);
+      benchCtx.closePath();
+      benchCtx.fill();
+
+      // 2. Draw Metric Ruler Track along bottom
+      const rulerY = h - 46;
+      benchCtx.fillStyle = '#1e293b';
+      benchCtx.beginPath();
+      benchCtx.roundRect(trackStartX - 12, rulerY, (trackEndX - trackStartX) + 24, 28, 6);
+      benchCtx.fill();
+      benchCtx.strokeStyle = '#475569';
+      benchCtx.lineWidth = 1.5;
+      benchCtx.stroke();
+
+      // Ruler tick marks (10 cm to 100 cm)
+      for (let d = 10; d <= 100; d += 10) {
+        const tx = distanceToCanvasX(d, w);
+        benchCtx.strokeStyle = '#94a3b8';
+        benchCtx.lineWidth = 1.5;
+        benchCtx.beginPath();
+        benchCtx.moveTo(tx, rulerY);
+        benchCtx.lineTo(tx, rulerY + 9);
+        benchCtx.stroke();
+
+        benchCtx.fillStyle = '#cbd5e1';
+        benchCtx.font = 'bold 10px Inter, sans-serif';
+        benchCtx.textAlign = 'center';
+        benchCtx.fillText(`${d}`, tx, rulerY + 21);
+      }
+
+      // Near / Far Labels below ruler
+      benchCtx.fillStyle = '#fbbf24';
+      benchCtx.font = 'bold 10px Inter, sans-serif';
+      benchCtx.textAlign = 'left';
+      benchCtx.fillText('← Near (10 cm)', trackStartX - 8, h - 6);
+      benchCtx.textAlign = 'right';
+      benchCtx.fillText('Far (100 cm) →', trackEndX + 8, h - 6);
+
+      // Dashed Distance Measurement Line between Tube and Lamp
+      benchCtx.strokeStyle = 'rgba(250, 204, 21, 0.65)';
+      benchCtx.setLineDash([4, 4]);
+      benchCtx.lineWidth = 1.5;
+      benchCtx.beginPath();
+      benchCtx.moveTo(tubeCenterX + 34, rulerY - 12);
+      benchCtx.lineTo(lampX, rulerY - 12);
+      benchCtx.stroke();
+      benchCtx.setLineDash([]);
+
+      benchCtx.fillStyle = '#fde047';
+      benchCtx.font = 'bold 11px Inter, sans-serif';
+      benchCtx.textAlign = 'center';
+      benchCtx.fillText(`${lab.distance} cm`, (tubeCenterX + 34 + lampX) / 2, rulerY - 18);
+
+      // 3. Draw Elodea Test Tube on Left
+      const tubeW = 64;
+      const tubeH = h - 72;
+      const tubeX = tubeCenterX - tubeW / 2;
+      const tubeY = 28;
+      const waterTop = tubeY + 22;
+      const waterH = tubeH - 22;
+
+      benchCtx.save();
+      benchCtx.beginPath();
+      benchCtx.roundRect(tubeX, waterTop, tubeW, waterH, [0, 0, 32, 32]);
+      benchCtx.clip();
+
+      // BTB Solution Fill (color reflects pH / CO2 uptake)
+      const btbStyle = getBTBStyle(lab.ph);
+      benchCtx.fillStyle = btbStyle.liquidRGBA;
+      benchCtx.fillRect(tubeX, waterTop, tubeW, waterH);
+
+      // Elodea Stem & Leaves
+      const plantBottomY = tubeY + tubeH - 14;
+      const plantTopY = waterTop + 30;
+      benchCtx.strokeStyle = '#14532d';
+      benchCtx.lineWidth = 4;
+      benchCtx.beginPath();
+      benchCtx.moveTo(tubeCenterX, plantBottomY);
+      benchCtx.lineTo(tubeCenterX, plantTopY);
+      benchCtx.stroke();
+
+      for (let ly = plantBottomY - 10; ly >= plantTopY; ly -= 13) {
+        benchCtx.fillStyle = '#22c55e';
+        benchCtx.beginPath();
+        benchCtx.ellipse(tubeCenterX - 11, ly, 10, 4, -0.35, 0, Math.PI * 2);
+        benchCtx.ellipse(tubeCenterX + 11, ly - 3, 10, 4, 0.35, 0, Math.PI * 2);
+        benchCtx.fill();
+      }
+
+      // Animated Oxygen Bubbles proportional to rate
+      const spawnProb = 0.02 + (lab.rate / 100) * 0.34;
+      if (Math.random() < spawnProb && lab.bubbles.length < 40) {
+        lab.bubbles.push({
+          x: tubeCenterX + (Math.random() - 0.5) * 24,
+          y: plantTopY + Math.random() * 90,
+          r: 2.4 + Math.random() * 2.2,
+          speed: 0.8 + (lab.rate / 100) * 1.5
+        });
+      }
+
+      lab.bubbles.forEach(b => {
+        b.y -= b.speed;
+        b.x += Math.sin(b.y * 0.08) * 0.3;
+        benchCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        benchCtx.beginPath();
+        benchCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        benchCtx.fill();
+      });
+      lab.bubbles = lab.bubbles.filter(b => b.y > waterTop + 4);
+
+      benchCtx.restore();
+
+      // Glass Test Tube Outline & Stopper
+      benchCtx.strokeStyle = 'rgba(226, 232, 240, 0.85)';
+      benchCtx.lineWidth = 2.8;
+      benchCtx.beginPath();
+      benchCtx.roundRect(tubeX, tubeY, tubeW, tubeH, [4, 4, 32, 32]);
+      benchCtx.stroke();
+
+      benchCtx.fillStyle = '#d97706';
+      benchCtx.beginPath();
+      benchCtx.roundRect(tubeX + 6, tubeY - 8, tubeW - 12, 15, 4);
+      benchCtx.fill();
+
+      benchCtx.fillStyle = '#e2e8f0';
+      benchCtx.font = 'bold 10px Inter, sans-serif';
+      benchCtx.textAlign = 'center';
+      benchCtx.fillText('Elodea + BTB', tubeCenterX, h - 18);
+
+      // 4. Draw Movable LED Light Housing & Stand on Track
+      // Stand post down to ruler
+      benchCtx.strokeStyle = '#94a3b8';
+      benchCtx.lineWidth = 5;
+      benchCtx.beginPath();
+      benchCtx.moveTo(lampX + 10, lampY + 18);
+      benchCtx.lineTo(lampX + 10, rulerY);
+      benchCtx.stroke();
+
+      // Slider Base Foot on Ruler
+      benchCtx.fillStyle = '#f59e0b';
+      benchCtx.beginPath();
+      benchCtx.roundRect(lampX - 4, rulerY - 6, 28, 12, 4);
+      benchCtx.fill();
+
+      // Lamp Housing (pointing left)
+      benchCtx.fillStyle = '#475569';
+      benchCtx.beginPath();
+      benchCtx.roundRect(lampX - 6, lampY - 20, 28, 40, 6);
+      benchCtx.fill();
+
+      // Glowing Bulb Lens facing left
+      benchCtx.fillStyle = '#fef08a';
+      benchCtx.beginPath();
+      benchCtx.arc(lampX - 8, lampY, 14, Math.PI / 2, (Math.PI * 3) / 2);
+      benchCtx.fill();
+
+      // Label above lamp
+      benchCtx.fillStyle = '#fde047';
+      benchCtx.font = 'bold 11px Inter, sans-serif';
+      benchCtx.textAlign = 'center';
+      benchCtx.fillText('LED Light', lampX + 6, lampY - 30);
+      benchCtx.fillStyle = '#94a3b8';
+      benchCtx.font = '10px Inter, sans-serif';
+      benchCtx.fillText('◄ Drag ►', lampX + 6, lampY - 18);
+    }
+
+    /**
+     * Draw Live Inverse Decay Graph (X = Distance 10..100 cm, Y = Relative Rate %)
+     */
+    function drawInverseGraph() {
+      const w = graphCanvas.width;
+      const h = graphCanvas.height;
+      graphCtx.clearRect(0, 0, w, h);
+
+      graphCtx.fillStyle = '#091124';
+      graphCtx.fillRect(0, 0, w, h);
+
+      const padLeft = 48;
+      const padRight = 22;
+      const padTop = 20;
+      const padBottom = 42;
+      const plotW = w - padLeft - padRight;
+      const plotH = h - padTop - padBottom;
+
+      // Horizontal Grid Lines (0% to 100%)
+      graphCtx.strokeStyle = '#1e293b';
+      graphCtx.lineWidth = 1;
+      for (let pct = 0; pct <= 100; pct += 25) {
+        const y = padTop + plotH - (pct / 100) * plotH;
+        graphCtx.beginPath();
+        graphCtx.moveTo(padLeft, y);
+        graphCtx.lineTo(padLeft + plotW, y);
+        graphCtx.stroke();
+
+        graphCtx.fillStyle = '#94a3b8';
+        graphCtx.font = '11px Inter, sans-serif';
+        graphCtx.textAlign = 'right';
+        graphCtx.fillText(`${pct}%`, padLeft - 8, y + 4);
+      }
+
+      // Vertical Grid Lines (10, 40, 70, 100 cm)
+      [10, 40, 70, 100].forEach(d => {
+        const x = padLeft + ((d - 10) / 90) * plotW;
+        graphCtx.beginPath();
+        graphCtx.moveTo(x, padTop);
+        graphCtx.lineTo(x, padTop + plotH);
+        graphCtx.stroke();
+
+        graphCtx.fillStyle = '#94a3b8';
+        graphCtx.font = '11px Inter, sans-serif';
+        graphCtx.textAlign = 'center';
+        graphCtx.fillText(`${d}cm`, x, padTop + plotH + 16);
+      });
+
+      // Axes
+      graphCtx.strokeStyle = '#64748b';
+      graphCtx.lineWidth = 2;
+      graphCtx.beginPath();
+      graphCtx.moveTo(padLeft, padTop);
+      graphCtx.lineTo(padLeft, padTop + plotH);
+      graphCtx.lineTo(padLeft + plotW, padTop + plotH);
+      graphCtx.stroke();
+
+      // Axis Titles
+      graphCtx.fillStyle = '#e2e8f0';
+      graphCtx.font = 'bold 11px Inter, sans-serif';
+      graphCtx.textAlign = 'center';
+      graphCtx.fillText('Relative Distance From Light Source (Near → Far)', padLeft + plotW / 2, h - 8);
+
+      graphCtx.save();
+      graphCtx.translate(14, padTop + plotH / 2);
+      graphCtx.rotate(-Math.PI / 2);
+      graphCtx.fillText('Relative Rate (%)', 0, 0);
+      graphCtx.restore();
+
+      // Dashed Theoretical Inverse Curve
+      graphCtx.strokeStyle = 'rgba(250, 204, 21, 0.55)';
+      graphCtx.setLineDash([5, 5]);
+      graphCtx.lineWidth = 2.5;
+      graphCtx.beginPath();
+      for (let d = 10; d <= 100; d += 2) {
+        const m = calculateMetricsFromDistance(d);
+        const px = padLeft + ((d - 10) / 90) * plotW;
+        const py = padTop + plotH - (m.rate / 100) * plotH;
+        if (d === 10) graphCtx.moveTo(px, py);
+        else graphCtx.lineTo(px, py);
+      }
+      graphCtx.stroke();
+      graphCtx.setLineDash([]);
+
+      // Logged Student Trial Points (Green circles connected by solid line)
+      if (lab.recordedTrials.length > 0) {
+        const sorted = [...lab.recordedTrials].sort((a, b) => a.distance - b.distance);
+        graphCtx.strokeStyle = '#10b981';
+        graphCtx.lineWidth = 2.5;
+        graphCtx.beginPath();
+        sorted.forEach((pt, idx) => {
+          const px = padLeft + ((pt.distance - 10) / 90) * plotW;
+          const py = padTop + plotH - (pt.rate / 100) * plotH;
+          if (idx === 0) graphCtx.moveTo(px, py);
+          else graphCtx.lineTo(px, py);
+        });
+        graphCtx.stroke();
+
+        sorted.forEach(pt => {
+          const px = padLeft + ((pt.distance - 10) / 90) * plotW;
+          const py = padTop + plotH - (pt.rate / 100) * plotH;
+          graphCtx.fillStyle = '#10b981';
+          graphCtx.beginPath();
+          graphCtx.arc(px, py, 5.5, 0, Math.PI * 2);
+          graphCtx.fill();
+          graphCtx.strokeStyle = '#ffffff';
+          graphCtx.lineWidth = 1.5;
+          graphCtx.stroke();
+        });
+      }
+
+      // Live Active Yellow Dot
+      const curX = padLeft + ((lab.distance - 10) / 90) * plotW;
+      const curY = padTop + plotH - (lab.rate / 100) * plotH;
+
+      graphCtx.fillStyle = 'rgba(245, 158, 11, 0.3)';
+      graphCtx.beginPath();
+      graphCtx.arc(curX, curY, 13, 0, Math.PI * 2);
+      graphCtx.fill();
+
+      graphCtx.fillStyle = '#f59e0b';
+      graphCtx.beginPath();
+      graphCtx.arc(curX, curY, 6.5, 0, Math.PI * 2);
+      graphCtx.fill();
+      graphCtx.strokeStyle = '#ffffff';
+      graphCtx.lineWidth = 2;
+      graphCtx.stroke();
+    }
+
+    /**
+     * Record Current Distance Trial into Student Data Table
+     */
+    function recordTrial() {
+      const existingIdx = lab.recordedTrials.findIndex(t => t.distance === lab.distance);
+      const entry = {
+        distance: lab.distance,
+        intensity: lab.intensity,
+        bubblesPerMin: lab.bubblesPerMin,
+        ph: lab.ph,
+        rate: lab.rate
+      };
+
+      if (existingIdx >= 0) {
+        lab.recordedTrials[existingIdx] = entry;
+        showToast(`Updated trial for ${lab.distance} cm!`);
+      } else {
+        lab.recordedTrials.push(entry);
+        showToast(`Recorded ${lab.distance} cm → ${lab.rate}% photosynthesis rate!`);
+      }
+
+      renderDataTable();
+      drawInverseGraph();
+    }
+
+    function renderDataTable() {
+      const tbody = document.getElementById('data-table-body');
+      tbody.innerHTML = '';
+
+      if (lab.recordedTrials.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-6 px-3 text-center text-slate-400 italic">
+              Move the LED lamp to different distances and click <strong>"Record Data Point"</strong>!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const sorted = [...lab.recordedTrials].sort((a, b) => a.distance - b.distance);
+      sorted.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 font-medium text-slate-700';
+        tr.innerHTML = `
+          <td class="py-2 px-2.5 font-extrabold text-slate-900">${t.distance} cm</td>
+          <td class="py-2 px-2.5 font-bold text-amber-700">${t.intensity}%</td>
+          <td class="py-2 px-2.5">${t.bubblesPerMin} / min</td>
+          <td class="py-2 px-2.5">${t.ph.toFixed(1)}</td>
+          <td class="py-2 px-2.5 font-extrabold text-emerald-700">${t.rate}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function clearDataTable() {
+      lab.recordedTrials = [];
+      renderDataTable();
+      drawInverseGraph();
+      showToast('Data table cleared.');
+    }
+
+    /**
+     * Self-Checking 7th-Grade Checkpoints
+     */
+    function answerQuiz(qNum, choice) {
+      const fb = document.getElementById(`q${qNum}-feedback`);
+      fb.classList.remove('hidden');
+
+      const key = {
+        1: {
+          correct: 'B',
+          yes: '✅ Correct! The graph drops steeply at first (from 10 cm to 40 cm) and then flattens out at a low rate as distance increases.',
+          no: '❌ Not quite! Watch the yellow dot on the graph as you move the slider from 10 cm to 80 cm—it curves downward sharply at first, then levels off.'
+        },
+        2: {
+          correct: 'A',
+          yes: '✅ Spot on! Because light spreads out in a cone as it travels, doubling the distance spreads the same light energy over 4 times the area (the Inverse-Square Law).',
+          no: '❌ Try again! The LED bulb stays at the same brightness, but its light rays spread out wider and wider as distance increases.'
+        },
+        3: {
+          correct: 'B',
+          yes: '✅ Great job! At 100 cm, very little light reaches the plant, so photosynthesis slows down, leaving more CO₂ in the water and shifting BTB toward yellow-green (lower pH).',
+          no: '❌ Remember: Plants need light energy to remove CO₂ during photosynthesis. Far from the light, CO₂ stays in the water and lowers the pH.'
+        }
+      };
+
+      if (choice === key[qNum].correct) {
+        lab.quizAnswered[qNum] = true;
+        fb.className = 'text-xs p-2.5 rounded-lg font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300';
+        fb.textContent = key[qNum].yes;
+      } else {
+        fb.className = 'text-xs p-2.5 rounded-lg font-semibold bg-rose-100 text-rose-900 border border-rose-300';
+        fb.textContent = key[qNum].no;
+      }
+
+      const solved = Object.values(lab.quizAnswered).filter(Boolean).length;
+      document.getElementById('quiz-score-badge').textContent = `${solved} / 3 Answered`;
+    }
+
+    function resetLab() {
+      lab.recordedTrials = [];
+      lab.quizAnswered = { 1: false, 2: false, 3: false };
+      [1, 2, 3].forEach(n => document.getElementById(`q${n}-feedback`).classList.add('hidden'));
+      document.getElementById('quiz-score-badge').textContent = '0 / 3 Answered';
+      renderDataTable();
+      setDistance(10);
+    }
+
+    function animate() {
+      drawBenchScene();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvases);
+    window.onload = function () {
+      resizeCanvases();
+      setDistance(10);
+      animate();
+    };
+  </script>
+</body>
+</html>
