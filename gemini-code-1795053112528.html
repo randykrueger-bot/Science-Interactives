@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 3: How Does Light Intensity Affect Photosynthesis?</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Custom Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(to right, #334155, #eab308, #fef08a);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      margin-top: -6px;
+      background-color: #f59e0b;
+      border: 3px solid #ffffff;
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Bubble Rising Animation */
+    @keyframes riseBubble {
+      0% {
+        transform: translateY(0) translateX(0) scale(0.75);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.9;
+      }
+      50% {
+        transform: translateY(-95px) translateX(5px) scale(0.95);
+      }
+      100% {
+        transform: translateY(-195px) translateX(-4px) scale(1.15);
+        opacity: 0;
+      }
+    }
+
+    .oxygen-bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #bae6fd 70%, #38bdf8 100%);
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+      pointer-events: none;
+      animation: riseBubble linear forwards;
+    }
+
+    /* Photon Pulse */
+    @keyframes photonDash {
+      0% {
+        stroke-dashoffset: 36;
+      }
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+    .light-ray {
+      stroke-dasharray: 8 10;
+      animation: photonDash 1s linear infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white shadow-md border-b border-slate-700">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-amber-500 text-slate-950 rounded-full">7th Grade Life Science</span>
+          <span class="text-slate-400 text-xs font-medium">MS-LS1-6 Investigation</span>
+        </div>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight mt-1">Lab 3: How Does Light Intensity Affect Photosynthesis?</h1>
+      </div>
+      <div class="flex items-center gap-2 text-xs sm:text-sm bg-slate-800 px-3 py-2 rounded-lg border border-slate-700">
+        <span class="text-amber-400 font-bold">Equation:</span>
+        <span>6CO₂ + 6H₂O + <span class="text-amber-300 font-semibold">Light Energy</span> → C₆H₁₂O₆ + 6O₂</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Column: Interactive Simulation & Controls (7 cols) -->
+    <section class="lg:col-span-7 flex flex-col gap-5">
+
+      <!-- Lab Simulation Canvas Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <h2 class="font-bold text-slate-800 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            Elodea Virtual Lab Bench
+          </h2>
+          <div class="flex items-center gap-3 text-xs font-semibold">
+            <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200">CO₂: Optimal (Constant)</span>
+            <span class="px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 border border-teal-200">Temp: 24°C (Constant)</span>
+          </div>
+        </div>
+
+        <!-- Visual Tank & Lamp Display -->
+        <div id="labScene" class="relative h-80 sm:h-96 w-full transition-colors duration-300 overflow-hidden flex items-center justify-between px-4 sm:px-10" style="background-color: #0f172a;">
+
+          <!-- Ambient Light Glow Overlay -->
+          <div id="ambientGlow" class="absolute inset-0 pointer-events-none transition-opacity duration-300" style="background: radial-gradient(circle at 22% 50%, rgba(254, 240, 138, 0.75) 0%, rgba(253, 224, 71, 0.25) 45%, rgba(15, 23, 42, 0) 78%); opacity: 0.5;"></div>
+
+          <!-- Lamp Fixture (Fixed Distance, Variable Dimmer Brightness) -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div class="text-xs font-bold uppercase tracking-wider mb-2 px-2.5 py-0.5 rounded bg-slate-900/80 text-amber-300 border border-amber-500/30">
+              Dimmer Lamp
+            </div>
+            <!-- SVG Lamp -->
+            <svg width="120" height="170" viewBox="0 0 120 170" class="overflow-visible">
+              <!-- Stand -->
+              <rect x="18" y="150" width="54" height="10" rx="4" fill="#475569" />
+              <rect x="40" y="65" width="8" height="85" fill="#64748b" />
+              <!-- Lamp Shade -->
+              <path d="M44 65 L82 40 L82 110 L44 85 Z" fill="#334155" stroke="#94a3b8" stroke-width="2" />
+              <!-- Bulb -->
+              <circle id="lampBulb" cx="86" cy="75" r="18" fill="#fef08a" />
+              <!-- Animated Light Rays -->
+              <g id="lightRaysGroup" opacity="0.6">
+                <line x1="108" y1="55" x2="215" y2="25" stroke="#fde047" stroke-width="3" class="light-ray" />
+                <line x1="112" y1="75" x2="225" y2="75" stroke="#fde047" stroke-width="3.5" class="light-ray" />
+                <line x1="108" y1="95" x2="215" y2="125" stroke="#fde047" stroke-width="3" class="light-ray" />
+              </g>
+            </svg>
+            <div class="mt-1 text-xs font-semibold text-slate-300 bg-slate-900/75 px-2 py-0.5 rounded">
+              Fixed Distance: 15 cm
+            </div>
+          </div>
+
+          <!-- Beaker & Elodea Plant -->
+          <div class="relative z-10 flex flex-col items-center mr-2 sm:mr-8">
+            <!-- Bubble Counter Badge -->
+            <div class="mb-2 flex items-center gap-2 bg-slate-900/85 text-white px-3 py-1 rounded-full border border-sky-400/40 shadow">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></span>
+              <span class="text-xs font-semibold text-sky-200">O₂ Bubbles / Min:</span>
+              <span id="liveRateBadge" class="text-sm font-extrabold text-amber-300">24</span>
+            </div>
+
+            <!-- Glass Beaker Container -->
+            <div id="beakerContainer" class="relative w-44 sm:w-52 h-56 sm:h-64 border-x-4 border-b-4 border-slate-300/80 rounded-b-2xl bg-sky-900/30 backdrop-blur-[1px] overflow-hidden shadow-inner">
+              <!-- Water Surface Line -->
+              <div class="absolute top-6 inset-x-0 h-1.5 bg-sky-300/50"></div>
+              <!-- Water Fill -->
+              <div id="waterTint" class="absolute top-6 inset-x-0 bottom-0 bg-gradient-to-b from-sky-400/20 to-sky-600/30 transition-all duration-300"></div>
+
+              <!-- Elodea Sprig SVG -->
+              <svg viewBox="0 0 140 180" class="absolute bottom-2 left-1/2 -translate-x-1/2 w-36 h-48 z-10">
+                <!-- Stem -->
+                <path d="M70 172 Q66 110 72 32" stroke="#15803d" stroke-width="5" fill="none" stroke-linecap="round" />
+                <!-- Leaves Left & Right -->
+                <g id="plantLeaves" fill="#22c55e" stroke="#14532d" stroke-width="1">
+                  <ellipse cx="52" cy="150" rx="18" ry="6" transform="rotate(-20 52 150)" />
+                  <ellipse cx="88" cy="145" rx="18" ry="6" transform="rotate(20 88 145)" />
+                  <ellipse cx="50" cy="125" rx="20" ry="6.5" transform="rotate(-25 50 125)" />
+                  <ellipse cx="90" cy="120" rx="20" ry="6.5" transform="rotate(25 90 120)" />
+                  <ellipse cx="48" cy="100" rx="21" ry="6.5" transform="rotate(-20 48 100)" />
+                  <ellipse cx="92" cy="95" rx="21" ry="6.5" transform="rotate(20 92 95)" />
+                  <ellipse cx="51" cy="75" rx="19" ry="6" transform="rotate(-25 51 75)" />
+                  <ellipse cx="89" cy="70" rx="19" ry="6" transform="rotate(25 89 70)" />
+                  <ellipse cx="55" cy="52" rx="16" ry="5.5" transform="rotate(-30 55 52)" />
+                  <ellipse cx="86" cy="48" rx="16" ry="5.5" transform="rotate(30 86 48)" />
+                  <ellipse cx="72" cy="28" rx="7" ry="15" />
+                </g>
+              </svg>
+
+              <!-- Bubble Layer -->
+              <div id="bubbleLayer" class="absolute inset-0 z-20 pointer-events-none"></div>
+            </div>
+            <span class="text-xs font-medium text-slate-300 mt-1.5">Aquatic Plant (<em>Elodea</em>) in Water</span>
+          </div>
+        </div>
+
+        <!-- Light Intensity Controls -->
+        <div class="p-5 bg-white border-t border-slate-200">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <label for="intensitySlider" class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <span>Independent Variable: Light Intensity</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <span id="intensityValueDisplay" class="text-2xl font-extrabold text-amber-600">50%</span>
+              <span id="intensityLabelBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Medium Light</span>
+            </div>
+          </div>
+
+          <input id="intensitySlider" type="range" min="0" max="100" step="10" value="50" class="w-full" />
+
+          <!-- Quick Preset Buttons -->
+          <div class="grid grid-cols-6 gap-1.5 mt-3">
+            <button type="button" data-val="0" class="preset-btn py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 transition">0% (Dark)</button>
+            <button type="button" data-val="20" class="preset-btn py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 transition">20%</button>
+            <button type="button" data-val="40" class="preset-btn py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 transition">40%</button>
+            <button type="button" data-val="60" class="preset-btn py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 transition">60%</button>
+            <button type="button" data-val="80" class="preset-btn py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 transition">80%</button>
+            <button type="button" data-val="100" class="preset-btn py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 transition">100% (Max)</button>
+          </div>
+
+          <!-- Action Bar -->
+          <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <p id="statusHint" class="text-xs text-slate-600 max-w-md">
+              Adjust the dimmer switch, observe the oxygen bubble rate, then click <strong>Record Data Point</strong> to plot it on your graph.
+            </p>
+            <div class="flex items-center gap-2">
+              <button id="resetBtn" type="button" class="px-3.5 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+                Clear Data
+              </button>
+              <button id="recordBtn" type="button" class="px-5 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                <span>+ Record Data Point</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Science Concept & Limiting Factor Callout -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5">
+        <h3 class="font-bold text-amber-900 text-sm flex items-center gap-2">
+          <span>💡 What is happening inside the chloroplasts?</span>
+        </h3>
+        <p id="explanationText" class="text-xs sm:text-sm text-amber-950/90 mt-1.5 leading-relaxed">
+          At <strong>50% light intensity</strong>, chlorophyll absorbs moderate light energy to split water molecules and power sugar production, releasing <strong>24 oxygen bubbles per minute</strong>. Try testing 0%, 20%, 60%, 80%, and 100% to see if the rate keeps rising forever or levels off!
+        </p>
+      </div>
+    </section>
+
+    <!-- Right Column: Live Data Table, Graph & Check for Understanding (5 cols) -->
+    <section class="lg:col-span-5 flex flex-col gap-5">
+
+      <!-- Live Graph Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-slate-800 text-base">Photosynthesis Rate Graph</h2>
+            <p class="text-xs text-slate-500">Dependent Variable: Oxygen Bubbles per Minute</p>
+          </div>
+          <span id="pointsCountBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">0 points recorded</span>
+        </div>
+
+        <!-- SVG Line Graph -->
+        <div class="w-full bg-slate-50 rounded-xl border border-slate-200 p-2">
+          <svg id="rateChart" viewBox="0 0 380 230" class="w-full h-auto">
+            <!-- Grid lines Y -->
+            <g stroke="#e2e8f0" stroke-width="1">
+              <line x1="48" y1="20" x2="360" y2="20" />
+              <line x1="48" y1="54" x2="360" y2="54" />
+              <line x1="48" y1="88" x2="360" y2="88" />
+              <line x1="48" y1="122" x2="360" y2="122" />
+              <line x1="48" y1="156" x2="360" y2="156" />
+              <line x1="48" y1="190" x2="360" y2="190" />
+            </g>
+
+            <!-- Axes -->
+            <line x1="48" y1="15" x2="48" y2="190" stroke="#475569" stroke-width="2" />
+            <line x1="48" y1="190" x2="362" y2="190" stroke="#475569" stroke-width="2" />
+
+            <!-- Y Axis Labels (0 to 50 bubbles/min) -->
+            <g font-size="10" fill="#475569" text-anchor="end" font-weight="600">
+              <text x="42" y="194">0</text>
+              <text x="42" y="160">10</text>
+              <text x="42" y="126">20</text>
+              <text x="42" y="92">30</text>
+              <text x="42" y="58">40</text>
+              <text x="42" y="24">50</text>
+            </g>
+
+            <!-- X Axis Labels (0% to 100%) -->
+            <g font-size="10" fill="#475569" text-anchor="middle" font-weight="600">
+              <text x="48" y="205">0%</text>
+              <text x="110.4" y="205">20%</text>
+              <text x="172.8" y="205">40%</text>
+              <text x="235.2" y="205">60%</text>
+              <text x="297.6" y="205">80%</text>
+              <text x="360" y="205">100%</text>
+            </g>
+
+            <!-- Axis Titles -->
+            <text x="204" y="223" font-size="11" fill="#1e293b" text-anchor="middle" font-weight="700">Light Intensity (%)</text>
+            <text x="14" y="102" font-size="11" fill="#1e293b" text-anchor="middle" font-weight="700" transform="rotate(-90 14 102)">O₂ Bubbles / Min</text>
+
+            <!-- Plotted Line & Dots -->
+            <polyline id="chartLine" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="" />
+            <g id="chartPoints"></g>
+          </svg>
+        </div>
+
+        <!-- Recorded Data Table -->
+        <div class="mt-4 max-h-40 overflow-y-auto border border-slate-200 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 text-slate-700 font-bold sticky top-0">
+              <tr>
+                <th class="py-2 px-3">Light Intensity</th>
+                <th class="py-2 px-3">O₂ Bubbles / Min</th>
+                <th class="py-2 px-3">Observation</th>
+              </tr>
+            </thead>
+            <tbody id="dataTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <tr id="emptyRow">
+                <td colspan="3" class="py-4 px-3 text-center text-slate-400 italic">No trials recorded yet. Click "+ Record Data Point".</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Analysis Questions Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h2 class="font-bold text-slate-800 text-base mb-1">Check Your Understanding</h2>
+        <p class="text-xs text-slate-500 mb-3">Record at least 4 data points (including 0%, 40%, 80%, and 100%) to test your conclusions.</p>
+
+        <div class="space-y-4 text-xs sm:text-sm">
+          <!-- Question 1 -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <p class="font-semibold text-slate-800 mb-2">1. What happens to the rate of photosynthesis as light intensity increases from 0% to 70%?</p>
+            <div class="space-y-1.5">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="q1" value="a" class="accent-emerald-600">
+                <span>It decreases because too much light damages the plant.</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="q1" value="b" class="accent-emerald-600">
+                <span>It increases steadily because more light energy powers the reaction.</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="q1" value="c" class="accent-emerald-600">
+                <span>It stays at zero the entire time.</span>
+              </label>
+            </div>
+            <p id="q1Feedback" class="mt-2 text-xs font-bold hidden"></p>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <p class="font-semibold text-slate-800 mb-2">2. Why does the graph flatten out (plateau) between 80% and 100% light intensity?</p>
+            <div class="space-y-1.5">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="q2" value="a" class="accent-emerald-600">
+                <span>The plant is saturated—another factor (like CO₂ or enzymes) is now limiting the speed.</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="q2" value="b" class="accent-emerald-600">
+                <span>Photosynthesis stops completely at high brightness.</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="q2" value="c" class="accent-emerald-600">
+                <span>Water turns into carbon dioxide at 80%.</span>
+              </label>
+            </div>
+            <p id="q2Feedback" class="mt-2 text-xs font-bold hidden"></p>
+          </div>
+
+          <button id="checkAnswersBtn" type="button" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-xl transition">
+            Check My Answers
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // Realistic biological light-saturation curve (0% to 100%)
+    const rateLookup = {
+      0: 0,
+      10: 5,
+      20: 10,
+      30: 15,
+      40: 20,
+      50: 24,
+      60: 29,
+      70: 33,
+      80: 35,
+      90: 35,
+      100: 35
+    };
+
+    const slider = document.getElementById('intensitySlider');
+    const intensityDisplay = document.getElementById('intensityValueDisplay');
+    const intensityBadge = document.getElementById('intensityLabelBadge');
+    const liveRateBadge = document.getElementById('liveRateBadge');
+    const labScene = document.getElementById('labScene');
+    const ambientGlow = document.getElementById('ambientGlow');
+    const lampBulb = document.getElementById('lampBulb');
+    const lightRaysGroup = document.getElementById('lightRaysGroup');
+    const explanationText = document.getElementById('explanationText');
+    const bubbleLayer = document.getElementById('bubbleLayer');
+
+    const recordBtn = document.getElementById('recordBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const dataTableBody = document.getElementById('dataTableBody');
+    const chartLine = document.getElementById('chartLine');
+    const chartPoints = document.getElementById('chartPoints');
+    const pointsCountBadge = document.getElementById('pointsCountBadge');
+
+    let currentIntensity = 50;
+    let recordedData = {}; // key: intensity, value: rate
+    let bubbleTimer = null;
+
+    function getCategory(val) {
+      if (val === 0) return { label: 'Total Darkness', cls: 'bg-slate-200 text-slate-800', note: 'No photosynthesis' };
+      if (val <= 30) return { label: 'Low Light', cls: 'bg-amber-100 text-amber-800', note: 'Slow O₂ production' };
+      if (val <= 70) return { label: 'Moderate-High Light', cls: 'bg-yellow-100 text-yellow-800', note: 'Steady rate increase' };
+      return { label: 'Maximum Saturation', cls: 'bg-emerald-100 text-emerald-800', note: 'Plateau (Light saturated)' };
+    }
+
+    function updateSimulation(val) {
+      currentIntensity = parseInt(val, 10);
+      const rate = rateLookup[currentIntensity];
+      const cat = getCategory(currentIntensity);
+
+      intensityDisplay.textContent = `\${currentIntensity}%`;
+      intensityBadge.textContent = cat.label;
+      intensityBadge.className = `text-xs font-bold px-2.5 py-1 rounded-full \${cat.cls}`;
+      liveRateBadge.textContent = rate;
+
+      // Visual lighting updates
+      const ratio = currentIntensity / 100;
+      ambientGlow.style.opacity = ratio === 0 ? '0' : (0.18 + ratio * 0.82).toFixed(2);
+      lightRaysGroup.setAttribute('opacity', ratio === 0 ? '0' : (0.15 + ratio * 0.85).toFixed(2));
+      lampBulb.setAttribute('fill', ratio === 0 ? '#475569' : '#fef08a');
+      labScene.style.backgroundColor = currentIntensity === 0 ? '#020617' : (currentIntensity < 50 ? '#0f172a' : '#1e293b');
+
+      // Update explanation callout
+      if (currentIntensity === 0) {
+        explanationText.innerHTML = `At <strong>0% light intensity (darkness)</strong>, chlorophyll receives no light energy to drive photosynthesis, so <strong>0 oxygen bubbles</strong> are produced.`;
+      } else if (currentIntensity <= 70) {
+        explanationText.innerHTML = `At <strong>${currentIntensity}\% light intensity</strong>, increasing light supplies more energy to the chloroplasts, raising oxygen output to <strong>${rate} bubbles per minute</strong>.`;
+      } else {
+        explanationText.innerHTML = `At <strong>${currentIntensity}\% light intensity</strong>, the rate levels off at <strong>${rate} bubbles per minute</strong>. The plant has reached its <strong>light saturation point</strong>—another factor like CO₂ concentration or enzyme speed is now limiting how fast photosynthesis can run!`;
+      }
+
+      restartBubbleStream(rate);
+    }
+
+    function spawnBubble() {
+      const bubble = document.createElement('div');
+      bubble.className = 'oxygen-bubble';
+      const size = Math.floor(Math.random() * 6) + 6; // 6px to 11px
+      const leftOffset = 42 + Math.random() * 16; // around center sprig
+      const bottomOffset = 22 + Math.random() * 35;
+      const duration = (1.6 + Math.random() * 0.8).toFixed(2);
+
+      bubble.style.width = `\${size}px`;
+      bubble.style.height = `${size}px`; bubble.style.left = `${leftOffset}%`;
+      bubble.style.bottom = `${bottomOffset}\%`; bubble.style.animationDuration = `${duration}s`;
+
+      bubbleLayer.appendChild(bubble);
+      setTimeout(() => {
+        if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
+      }, duration * 1000);
+    }
+
+    function restartBubbleStream(ratePerMin) {
+      if (bubbleTimer) clearInterval(bubbleTimer);
+      if (ratePerMin <= 0) return;
+
+      // Visual spawn interval scaled so students clearly see speed differences
+      const intervalMs = Math.max(160, Math.round(6000 / ratePerMin));
+      spawnBubble();
+      bubbleTimer = setInterval(spawnBubble, intervalMs);
+    }
+
+    function renderDataAndChart() {
+      const sortedIntensities = Object.keys(recordedData)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      pointsCountBadge.textContent = `${sortedIntensities.length} point${sortedIntensities.length === 1 ? '' : 's'} recorded`;
+
+      // Update Table
+      if (sortedIntensities.length === 0) {
+        dataTableBody.innerHTML = `<tr id="emptyRow"><td colspan="3" class="py-4 px-3 text-center text-slate-400 italic">No trials recorded yet. Click "+ Record Data Point".</td></tr>`;
+        chartLine.setAttribute('points', '');
+        chartPoints.innerHTML = '';
+        return;
+      }
+
+      dataTableBody.innerHTML = sortedIntensities.map(x => {
+        const y = recordedData[x];
+        const cat = getCategory(x);
+        return `
+          <tr
