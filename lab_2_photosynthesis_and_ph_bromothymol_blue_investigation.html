@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 2: Photosynthesis and pH (Bromothymol Blue Investigation)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Custom Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 10px;
+      border-radius: 9999px;
+      background: #cbd5e1;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #0d9488;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.45);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.12);
+    }
+
+    .lcd-screen {
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Lab Header -->
+  <header class="bg-gradient-to-r from-teal-800 via-emerald-800 to-sky-900 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-3 text-center sm:text-left">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-2xl shrink-0">
+          🧪
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-200">LabXchange Virtual Investigation • Lab 2 of 4</div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
+            Photosynthesis and pH (Bromothymol Blue Investigation)
+          </h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1.5 rounded-xl bg-white/15 border border-white/20 text-xs font-semibold text-emerald-50">
+          CO<sub>2</sub> + H<sub>2</sub>O &rlhar; H<sub>2</sub>CO<sub>3</sub> (Carbonic Acid)
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 flex flex-col gap-4">
+
+    <!-- Background Science & Quick Controls Bar -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+      <div class="flex items-start sm:items-center gap-2.5">
+        <span class="px-2.5 py-1 rounded-lg bg-teal-100 text-teal-800 font-extrabold text-xs uppercase shrink-0">
+          How BTB Works
+        </span>
+        <p class="text-xs sm:text-sm text-slate-700 leading-snug">
+          When <strong>CO<sub>2</sub></strong> dissolves in water, it forms weak <strong>carbonic acid</strong>, lowering the pH and turning Bromothymol Blue (BTB) <strong class="text-amber-600">Yellow</strong>. When <strong>Elodea</strong> performs photosynthesis, it removes CO<sub>2</sub>, raising the pH and turning BTB <strong class="text-sky-600">Blue</strong>!
+        </p>
+      </div>
+      <button onclick="fullLabReset()" class="px-3.5 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shrink-0 transition">
+        ↺ Full Reset
+      </button>
+    </section>
+
+    <!-- Bromothymol Blue Reference pH Color Scale Card (Matches LabXchange Scale Graphic) -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 space-y-2.5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-xs sm:text-sm font-extrabold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+          <span>🎨</span> Bromothymol Blue (BTB) pH Color Indicator Scale
+        </h2>
+        <div class="flex items-center gap-3 text-xs font-bold">
+          <span class="text-amber-600">pH 6.0–6.6: Yellow (High CO<sub>2</sub> / Acidic)</span>
+          <span class="text-emerald-600">pH 6.8–7.2: Green (Neutral)</span>
+          <span class="text-sky-600">pH 7.4–8.2: Blue (Low CO<sub>2</sub> / Basic)</span>
+        </div>
+      </div>
+
+      <!-- Color Swatch Bar + Live Needle -->
+      <div class="relative pt-5 pb-1">
+        <!-- Moving Indicator Needle for Tube A -->
+        <div id="ph-needle" class="absolute top-0 -translate-x-1/2 transition-all duration-200 flex flex-col items-center" style="left: 50%;">
+          <span id="needle-label" class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-extrabold whitespace-nowrap shadow-xs">
+            Tube A: pH 7.0
+          </span>
+          <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-slate-900"></div>
+        </div>
+
+        <!-- 11-Step pH Spectrum Swatches (6.0 to 8.0) -->
+        <div class="grid grid-cols-11 rounded-xl overflow-hidden border border-slate-300 shadow-inner text-center text-[11px] font-extrabold">
+          <div class="py-2.5 bg-[#eab308] text-slate-950">6.0</div>
+          <div class="py-2.5 bg-[#d9c814] text-slate-950">6.2</div>
+          <div class="py-2.5 bg-[#b8d422] text-slate-950">6.4</div>
+          <div class="py-2.5 bg-[#84cc16] text-slate-950">6.6</div>
+          <div class="py-2.5 bg-[#34d399] text-slate-950">6.8</div>
+          <div class="py-2.5 bg-[#10b981] text-white ring-2 ring-inset ring-white/70">7.0</div>
+          <div class="py-2.5 bg-[#0d9488] text-white">7.2</div>
+          <div class="py-2.5 bg-[#0284c7] text-white">7.4</div>
+          <div class="py-2.5 bg-[#2563eb] text-white">7.6</div>
+          <div class="py-2.5 bg-[#1d4ed8] text-white">7.8</div>
+          <div class="py-2.5 bg-[#1e3a8a] text-white">8.0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Interactive Lab Bench & Live Graph -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+      <!-- LEFT (7 cols): Test Tube Apparatus & Variable Controls -->
+      <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-base">1. Experimental Setup &amp; Test Tubes</h2>
+            <p class="text-xs text-slate-500">Compare Tube A (Elodea Plant) with an optional Control Tube (No Plant)</p>
+          </div>
+
+          <!-- Control Tube Toggle -->
+          <button id="btn-toggle-control" onclick="toggleControlTube()"
+            class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-bold text-xs transition flex items-center gap-1.5">
+            <span id="control-toggle-icon">➕</span> <span id="control-toggle-text">Show Control Tube (No Elodea)</span>
+          </button>
+        </div>
+
+        <!-- Apparatus Canvas + Digital pH Meter -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+          <!-- Canvas Stage (8 cols) -->
+          <div id="btb-canvas-wrapper" class="sm:col-span-8 relative h-[330px] rounded-2xl bg-slate-900 border-2 border-slate-700 overflow-hidden">
+            <canvas id="btb-canvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <!-- Digital pH Meter & Readouts (4 cols) -->
+          <div class="sm:col-span-4 flex flex-col gap-2.5">
+            <div class="rounded-2xl bg-slate-800 p-3.5 border-2 border-slate-700 shadow-md text-white space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300">Digital pH Meter</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse"></span>
+              </div>
+
+              <!-- Tube A pH Readout -->
+              <div class="lcd-screen rounded-xl bg-slate-950 border border-teal-600/70 p-2.5">
+                <div class="text-[10px] font-bold uppercase text-teal-400">Tube A (Elodea) pH</div>
+                <div class="flex items-baseline justify-between mt-0.5">
+                  <span id="readout-ph-a" class="text-2xl font-black text-white">7.00</span>
+                  <span id="readout-color-a" class="text-xs font-extrabold px-2 py-0.5 rounded-md bg-emerald-500 text-white">Green</span>
+                </div>
+              </div>
+
+              <!-- Control Tube pH Readout (Shown when Control Tube active) -->
+              <div id="control-readout-box" class="hidden lcd-screen rounded-xl bg-slate-900 border border-slate-600 p-2">
+                <div class="text-[10px] font-bold uppercase text-slate-400">Tube B (Control) pH</div>
+                <div class="flex items-baseline justify-between mt-0.5">
+                  <span id="readout-ph-b" class="text-lg font-black text-slate-200">7.00</span>
+                  <span id="readout-color-b" class="text-[11px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-500 text-white">Green</span>
+                </div>
+              </div>
+
+              <!-- Dissolved CO2 Level -->
+              <div class="lcd-screen rounded-xl bg-slate-900 border border-slate-700 p-2">
+                <div class="text-[10px] font-bold uppercase text-slate-400">Dissolved CO<sub>2</sub> Level</div>
+                <div id="readout-co2-level" class="text-sm font-extrabold text-amber-300 mt-0.5">Moderate (Neutral)</div>
+              </div>
+            </div>
+
+            <!-- Record Observation Button -->
+            <button onclick="recordObservation()"
+              class="w-full py-2.5 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5">
+              <span>📋</span> Record Observation
+            </button>
+          </div>
+        </div>
+
+        <!-- Variable Control Panel (Starting pH, Light ON/OFF, Time Controls) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Left Controls: Starting Solution & Light Condition -->
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 space-y-2.5">
+            <div class="text-xs font-extrabold text-slate-800 uppercase tracking-wide">Step 1: Set Starting Solution &amp; Light</div>
+
+            <!-- Starting BTB Condition Buttons -->
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="setInitialSolution(7.0)"
+                class="py-2 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition">
+                🟢 Neutral Green (pH 7.0)
+              </button>
+              <button onclick="setInitialSolution(6.2)"
+                class="py-2 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-2xs transition">
+                🟡 Blow CO<sub>2</sub> / Yellow (pH 6.2)
+              </button>
+            </div>
+
+            <!-- Light ON vs Light OFF (Dark Foil) Toggle -->
+            <div class="grid grid-cols-2 gap-1.5 pt-0.5">
+              <button id="btn-light-on" onclick="setLightCondition(true)"
+                class="py-2 px-2.5 rounded-xl bg-amber-400 text-slate-950 border-2 border-amber-600 font-extrabold text-xs transition flex items-center justify-center gap-1">
+                <span>☀️</span> Light ON
+              </button>
+              <button id="btn-light-off" onclick="setLightCondition(false)"
+                class="py-2 px-2.5 rounded-xl bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold text-xs transition flex items-center justify-center gap-1">
+                <span>🌑</span> Light OFF (Dark)
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Controls: Time Simulation Slider & Play/Pause -->
+          <div class="rounded-2xl bg-teal-50/70 border border-teal-200 p-3 flex flex-col justify-between gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-teal-950 uppercase tracking-wide">Step 2: Elapsed Time</span>
+              <span id="time-badge" class="px-2.5 py-0.5 rounded-full bg-teal-700 text-white font-extrabold text-xs">
+                0 min / 60 min
+              </span>
+            </div>
+
+            <input id="time-slider" type="range" min="0" max="60" step="1" value="0" oninput="scrubTime(this.value)" class="w-full" />
+
+            <div class="flex items-center gap-2">
+              <button id="btn-run-timer" onclick="toggleTimer()"
+                class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition flex items-center justify-center gap-1.5">
+                <span id="timer-icon">▶️</span> <span id="timer-label">Run Experiment</span>
+              </button>
+              <button onclick="scrubTime(60)"
+                class="py-2 px-3 rounded-xl bg-white hover:bg-teal-100 border border-teal-300 text-teal-900 font-bold text-xs transition">
+                Fast-Forward (60m)
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT (5 cols): Real-Time pH vs. Time Graph & Live Science Explanation -->
+      <section class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between gap-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-base">2. Live pH Change Over Time</h2>
+            <p class="text-xs text-slate-500">Time (0–60 minutes) vs. Solution pH (6.0–8.0)</p>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] font-bold">
+            <span class="inline-flex items-center gap-1 text-teal-700"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block"></span>Tube A</span>
+            <span class="inline-flex items-center gap-1 text-slate-500"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>Control</span>
+          </div>
+        </div>
+
+        <!-- pH Graph Canvas -->
+        <div id="ph-graph-wrapper" class="relative w-full h-[290px] sm:h-[310px] rounded-2xl bg-slate-900 border-2 border-slate-700 overflow-hidden">
+          <canvas id="ph-graph-canvas" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- Dynamic Chemical Process Explanation -->
+        <div id="ph-explanation-box" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-950 font-medium leading-relaxed">
+          <strong>Ready at Neutral pH 7.0 (Green):</strong> Click <strong>Run Experiment</strong> with <strong>Light ON</strong> to see how Elodea changes the pH of the Bromothymol Blue solution over 60 minutes!
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Bottom Section: Recorded Data Table + 7th-Grade Checkpoint Questions -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+      <!-- Recorded Observations Table (5 cols) -->
+      <section class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5">
+            <span>📊</span> 3. Student Observation Log
+          </h3>
+          <button onclick="clearObservations()" class="text-xs font-bold text-rose-600 hover:text-rose-800 underline">
+            Clear Log
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
+                <th class="py-2.5 px-2.5">Condition</th>
+                <th class="py-2.5 px-2.5">Start pH</th>
+                <th class="py-2.5 px-2.5">Time</th>
+                <th class="py-2.5 px-2.5">Final pH</th>
+                <th class="py-2.5 px-2.5">BTB Color</th>
+              </tr>
+            </thead>
+            <tbody id="obs-table-body" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="5" class="py-6 px-3 text-center text-slate-400 italic">
+                  Run a test and click <strong>"Record Observation"</strong> to log your results!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3 Self-Checking 7th-Grade Checkpoint Questions (7 cols) -->
+      <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5">
+            <span>🧠</span> 4. Check Your Understanding (7th-Grade Questions)
+          </h3>
+          <span id="quiz-badge" class="px-2.5 py-1 rounded-full bg-teal-100 text-teal-800 font-extrabold text-xs">
+            0 / 3 Answered
+          </span>
+        </div>
+
+        <div class="space-y-3 text-xs sm:text-sm">
+
+          <!-- Question 1 (Matches LabXchange Thumbnail Question!) -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              1. An Elodea plant is placed in neutral BTB solution (pH 7.0, Green) under bright light energy. What color will the solution turn after 60 minutes?
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="checkQuiz(1, 'A', this)" class="py-2 px-3 rounded-lg bg-white hover:bg-emerald-50 border border-slate-300 font-bold text-emerald-700 transition">
+                A) Green
+              </button>
+              <button onclick="checkQuiz(1, 'B', this)" class="py-2 px-3 rounded-lg bg-white hover:bg-amber-50 border border-slate-300 font-bold text-amber-600 transition">
+                B) Yellow
+              </button>
+              <button onclick="checkQuiz(1, 'C', this)" class="py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-bold text-sky-600 transition">
+                C) Blue
+              </button>
+            </div>
+            <div id="q1-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              2. Why does the BTB solution turn Yellow (pH ~6.2) when Elodea is kept in the DARK (Light OFF)?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button onclick="checkQuiz(2, 'A', this)" class="py-2 px-3 rounded-lg bg-white hover:bg-teal-50 border border-slate-300 font-semibold text-left transition">
+                A) Without light, photosynthesis stops, so the plant only performs cellular respiration and releases CO<sub>2</sub>
+              </button>
+              <button onclick="checkQuiz(2, 'B', this)" class="py-2 px-3 rounded-lg bg-white hover:bg-teal-50 border border-slate-300 font-semibold text-left transition">
+                B) The plant absorbs oxygen and turns it into yellow sugar
+              </button>
+            </div>
+            <div id="q2-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+          <!-- Question 3 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              3. Why is it important to include a Control Tube (BTB solution with NO Elodea plant)?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button onclick="checkQuiz(3, 'A', this)" class="py-2 px-3 rounded-lg bg-white hover:bg-teal-50 border border-slate-300 font-semibold text-left transition">
+                A) To make extra oxygen bubbles for the experiment
+              </button>
+              <button onclick="checkQuiz(3, 'B', this)" class="py-2 px-3 rounded-lg bg-white hover:bg-teal-50 border border-slate-300 font-semibold text-left transition">
+                B) To prove that the Elodea plant—not light or water alone—caused the pH and color change
+              </button>
+            </div>
+            <div id="q3-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast-box" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+    <div id="toast-text" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-xl">
+      Observation recorded!
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Lab 2 Simulation State: BTB pH Chemistry & Elodea Gas Exchange
+     */
+    const sim = {
+      startPH: 7.0,        // 7.0 (Neutral Green) or 6.2 (Acidic Yellow)
+      lightOn: true,       // true = Light ON, false = Dark Foil
+      showControl: false,  // false = Tube A only, true = Tube A + Control Tube B
+      minutes: 0,          // 0 to 60 min
+      running: false,
+      frameCounter: 0,
+      bubblesA: [],
+      observations: [],
+      quizSolved: { 1: false, 2: false, 3: false }
+    };
+
+    const btbCanvas = document.getElementById('btb-canvas');
+    const btbCtx = btbCanvas.getContext('2d');
+    const phGraphCanvas = document.getElementById('ph-graph-canvas');
+    const phGraphCtx = phGraphCanvas.getContext('2d');
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-text').textContent = msg;
+      box.classList.remove('opacity-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('opacity-0'), 2100);
+    }
+
+    /**
+     * Calculate pH at time t (0..60 min) for Tube A (Elodea) and Tube B (Control)
+     */
+    function calculatePHAtMinute(min, isControl = false) {
+      if (isControl) {
+        // Without Elodea, pH remains virtually unchanged
+        return sim.startPH;
+      }
+
+      const progress = min / 60;
+      // Smooth exponential approach curve
+      const ease = 1 - Math.exp(-2.6 * progress);
+
+      if (sim.lightOn) {
+        // Photosynthesis removes CO2 faster than respiration produces it -> pH rises toward ~7.9
+        const targetPH = 7.92;
+        return +(sim.startPH + (targetPH - sim.startPH) * ease).toFixed(2);
+      } else {
+        // Dark: Photosynthesis stops; cellular respiration adds CO2 -> pH drops toward ~6.15
+        const targetPH = 6.15;
+        return +(sim.startPH + (targetPH - sim.startPH) * ease).toFixed(2);
+      }
+    }
+
+    /**
+     * Map pH (6.0 to 8.0) to realistic Bromothymol Blue RGB color & label
+     */
+    function getBTBAppearance(ph) {
+      if (ph < 6.65) {
+        return {
+          name: 'Yellow',
+          rgb: 'rgb(234, 179, 8)',
+          rgbaLiquid: 'rgba(234, 179, 8, 0.78)',
+          badgeClass: 'bg-amber-400 text-slate-950',
+          co2Text: 'High CO₂ (Acidic)'
+        };
+      } else if (ph <= 7.25) {
+        return {
+          name: 'Green',
+          rgb: 'rgb(16, 185, 129)',
+          rgbaLiquid: 'rgba(16, 185, 129, 0.75)',
+          badgeClass: 'bg-emerald-500 text-white',
+          co2Text: 'Moderate CO₂ (Neutral)'
+        };
+      } else {
+        return {
+          name: 'Blue',
+          rgb: 'rgb(37, 99, 235)',
+          rgbaLiquid: 'rgba(37, 99, 235, 0.78)',
+          badgeClass: 'bg-blue-600 text-white',
+          co2Text: 'Low CO₂ (Basic / Alkaline)'
+        };
+      }
+    }
+
+    /**
+     * Set starting solution pH (7.0 Neutral Green or 6.2 Acidic Yellow)
+     */
+    function setInitialSolution(ph) {
+      sim.running = false;
+      sim.minutes = 0;
+      sim.startPH = ph;
+      sim.bubblesA = [];
+      updateTimerButtonUI();
+      updateAllUI();
+      showToast(ph === 7.0 ? 'Reset to Neutral Green BTB (pH 7.0)' : 'CO₂ added! Solution is Acidic Yellow (pH 6.2)');
+    }
+
+    /**
+     * Toggle Light ON vs Light OFF (Dark Foil)
+     */
+    function setLightCondition(isOn) {
+      sim.lightOn = isOn;
+      const btnOn = document.getElementById('btn-light-on');
+      const btnOff = document.getElementById('btn-light-off');
+
+      if (isOn) {
+        btnOn.className = 'py-2 px-2.5 rounded-xl bg-amber-400 text-slate-950 border-2 border-amber-600 font-extrabold text-xs transition flex items-center justify-center gap-1';
+        btnOff.className = 'py-2 px-2.5 rounded-xl bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold text-xs transition flex items-center justify-center gap-1';
+      } else {
+        btnOff.className = 'py-2 px-2.5 rounded-xl bg-slate-800 text-white border-2 border-slate-950 font-extrabold text-xs transition flex items-center justify-center gap-1';
+        btnOn.className = 'py-2 px-2.5 rounded-xl bg-white hover:bg-amber-100 text-slate-700 border border-slate-300 font-bold text-xs transition flex items-center justify-center gap-1';
+      }
+
+      // Restart timer from 0 when switching light conditions so students see clean curve
+      sim.minutes = 0;
+      sim.running = false;
+      updateTimerButtonUI();
+      updateAllUI();
+    }
+
+    /**
+     * Toggle side-by-side Control Tube (No Elodea)
+     */
+    function toggleControlTube() {
+      sim.showControl = !sim.showControl;
+      const ctrlBox = document.getElementById('control-readout-box');
+      const btnText = document.getElementById('control-toggle-text');
+      const btnIcon = document.getElementById('control-toggle-icon');
+
+      if (sim.showControl) {
+        ctrlBox.classList.remove('hidden');
+        btnText.textContent = 'Hide Control Tube';
+        btnIcon.textContent = '➖';
+      } else {
+        ctrlBox.classList.add('hidden');
+        btnText.textContent = 'Show Control Tube (No Elodea)';
+        btnIcon.textContent = '➕';
+      }
+      updateAllUI();
+    }
+
+    /**
+     * Time playback controls
+     */
+    function toggleTimer() {
+      if (sim.minutes >= 60) {
+        sim.minutes = 0;
+      }
+      sim.running = !sim.running;
+      updateTimerButtonUI();
+    }
+
+    function updateTimerButtonUI() {
+      document.getElementById('timer-icon').textContent = sim.running ? '⏸️' : '▶️';
+      document.getElementById('timer-label').textContent = sim.running ? 'Pause Timer' : 'Run Experiment';
+    }
+
+    function scrubTime(val) {
+      sim.minutes = parseInt(val, 10);
+      if (sim.minutes >= 60) {
+        sim.running = false;
+        updateTimerButtonUI();
+      }
+      updateAllUI();
+    }
+
+    /**
+     * Synchronize all digital meters, pH scale needle, narrative box, and graph
+     */
+    function updateAllUI() {
+      document.getElementById('time-slider').value = sim.minutes;
+      document.getElementById('time-badge').textContent = `${sim.minutes} min / 60 min`;
+
+      const phA = calculatePHAtMinute(sim.minutes, false);
+      const phB = calculatePHAtMinute(sim.minutes, true);
+      const appA = getBTBAppearance(phA);
+      const appB = getBTBAppearance(phB);
+
+      // Update Digital pH Meter
+      document.getElementById('readout-ph-a').textContent = phA.toFixed(2);
+      const badgeA = document.getElementById('readout-color-a');
+      badgeA.textContent = appA.name;
+      badgeA.className = `text-xs font-extrabold px-2 py-0.5 rounded-md ${appA.badgeClass}`;
+
+      document.getElementById('readout-ph-b').textContent = phB.toFixed(2);
+      const badgeB = document.getElementById('readout-color-b');
+      badgeB.textContent = appB.name;
+      badgeB.className = `text-[11px] font-extrabold px-1.5 py-0.5 rounded-md ${appB.badgeClass}`;
+
+      document.getElementById('readout-co2-level').textContent = appA.co2Text;
+
+      // Move needle on BTB color scale (pH 6.0 -> 4.5%, pH 8.0 -> 95.5%)
+      const clampedPH = Math.max(6.0, Math.min(8.0, phA));
+      const pct = 4.5 + ((clampedPH - 6.0) / 2.0) * 91;
+      const needle = document.getElementById('ph-needle');
+      needle.style.left = `${pct}%`;
+      document.getElementById('needle-label').textContent = `Tube A: pH ${phA.toFixed(1)}`;
+
+      // Update live science explanation
+      const expBox = document.getElementById('ph-explanation-box');
+      if (sim.lightOn) {
+        expBox.className = 'p-3.5 rounded-xl bg-sky-50 border border-sky-200 text-xs sm:text-sm text-sky-950 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>Light ON (${sim.minutes} min):</strong> Elodea uses light energy to absorb dissolved <strong>CO<sub>2</sub></strong> for photosynthesis. Removing CO<sub>2</sub> reduces carbonic acid, causing pH to <strong>rise to ${phA.toFixed(2)}</strong> (${appA.name}) while releasing O<sub>2</sub> bubbles!`;
+      } else {
+        expBox.className = 'p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>Light OFF / Dark (${sim.minutes} min):</strong> Without light, photosynthesis stops, but Elodea still performs <strong>cellular respiration</strong>—releasing CO<sub>2</sub> into the water. Extra CO<sub>2</sub> forms carbonic acid, causing pH to <strong>drop to ${phA.toFixed(2)}</strong> (${appA.name}).`;
+      }
+
+      drawPHGraph();
+    }
+
+    /**
+     * Resize canvases cleanly on load & window resize
+     */
+    function resizeCanvases() {
+      const btbWrap = document.getElementById('btb-canvas-wrapper');
+      if (btbWrap) {
+        btbCanvas.width = btbWrap.clientWidth;
+        btbCanvas.height = btbWrap.clientHeight;
+      }
+      const graphWrap = document.getElementById('ph-graph-wrapper');
+      if (graphWrap) {
+        phGraphCanvas.width = graphWrap.clientWidth;
+        phGraphCanvas.height = graphWrap.clientHeight;
+      }
+      drawPHGraph();
+    }
+
+    /**
+     * Draw Test Tube Apparatus (Light/Dark environment, Tube A with Elodea, optional Control Tube B)
+     */
+    function drawApparatusScene() {
+      const w = btbCanvas.width;
+      const h = btbCanvas.height;
+      btbCtx.clearRect(0, 0, w, h);
+
+      // Background color reflects Light ON vs Dark Chamber
+      btbCtx.fillStyle = sim.lightOn ? '#0f172a' : '#020617';
+      btbCtx.fillRect(0, 0, w, h);
+
+      const tubeAX = sim.showControl ? w * 0.48 : w * 0.58;
+      const tubeBX = w * 0.78;
+
+      // 1. Light Source or Dark Foil Indicator on Left
+      if (sim.lightOn) {
+        const lampY = h * 0.5;
+        const beamGrad = btbCtx.createLinearGradient(45, lampY, w * 0.88, lampY);
+        beamGrad.addColorStop(0, 'rgba(253, 224, 71, 0.55)');
+        beamGrad.addColorStop(0.65, 'rgba(253, 224, 71, 0.16)');
+        beamGrad.addColorStop(1, 'rgba(253, 224, 71, 0.02)');
+        btbCtx.fillStyle = beamGrad;
+        btbCtx.beginPath();
+        btbCtx.moveTo(42, lampY - 18);
+        btbCtx.lineTo(w * 0.9, lampY - 115);
+        btbCtx.lineTo(w * 0.9, lampY + 115);
+        btbCtx.lineTo(42, lampY + 18);
+        btbCtx.closePath();
+        btbCtx.fill();
+
+        // Glowing Sun/Lamp Bulb
+        btbCtx.fillStyle = '#facc15';
+        btbCtx.beginPath();
+        btbCtx.arc(34, lampY, 20, 0, Math.PI * 2);
+        btbCtx.fill();
+
+        btbCtx.fillStyle = '#fef08a';
+        btbCtx.font = 'bold 11px Inter, sans-serif';
+        btbCtx.textAlign = 'center';
+        btbCtx.fillText('Light ON', 36, lampY + 36);
+      } else {
+        btbCtx.fillStyle = '#334155';
+        btbCtx.beginPath();
+        btbCtx.arc(34, h * 0.5, 18, 0, Math.PI * 2);
+        btbCtx.fill();
+
+        btbCtx.fillStyle = '#94a3b8';
+        btbCtx.font = 'bold 11px Inter, sans-serif';
+        btbCtx.textAlign = 'center';
+        btbCtx.fillText('Dark (No Light)', 44, h * 0.5 + 34);
+      }
+
+      // 2. Draw Tube A (Experimental Tube with Elodea)
+      const phA = calculatePHAtMinute(sim.minutes, false);
+      const appA = getBTBAppearance(phA);
+      drawSingleTestTube(tubeAX, h, appA.rgbaLiquid, true, `Tube A: pH ${phA.toFixed(1)}`);
+
+      // 3. Draw Optional Control Tube B (BTB Only, No Elodea)
+      if (sim.showControl) {
+        const phB = calculatePHAtMinute(sim.minutes, true);
+        const appB = getBTBAppearance(phB);
+        drawSingleTestTube(tubeBX, h, appB.rgbaLiquid, false, `Control: pH ${phB.toFixed(1)}`);
+      }
+    }
+
+    function drawSingleTestTube(centerX, canvasH, liquidColor, hasElodea, captionText) {
+      const tubeW = 68;
+      const tubeH = canvasH - 68;
+      const tubeX = centerX - tubeW / 2;
+      const tubeY = 34;
+      const waterTop = tubeY + 24;
+      const waterH = tubeH - 24;
+
+      btbCtx.save();
+      btbCtx.beginPath();
+      btbCtx.roundRect(tubeX, waterTop, tubeW, waterH, [0, 0, 34, 34]);
+      btbCtx.clip();
+
+      // BTB Indicator Liquid Fill
+      btbCtx.fillStyle = liquidColor;
+      btbCtx.fillRect(tubeX, waterTop, tubeW, waterH);
+
+      // Draw Elodea Plant if present
+      if (hasElodea) {
+        const plantBottomY = tubeY + tubeH - 16;
+        const plantTopY = waterTop + 34;
+
+        btbCtx.strokeStyle = '#14532d';
+        btbCtx.lineWidth = 4;
+        btbCtx.beginPath();
+        btbCtx.moveTo(centerX, plantBottomY);
+        btbCtx.lineTo(centerX, plantTopY);
+        btbCtx.stroke();
+
+        for (let ly = plantBottomY - 12; ly >= plantTopY; ly -= 14) {
+          btbCtx.fillStyle = '#16a34a';
+          btbCtx.beginPath();
+          btbCtx.ellipse(centerX - 12, ly, 11, 4.5, -0.35, 0, Math.PI * 2);
+          btbCtx.ellipse(centerX + 12, ly - 3, 11, 4.5, 0.35, 0, Math.PI * 2);
+          btbCtx.fill();
+        }
+
+        // Animated Gas Bubbles (O2 when Light ON, tiny CO2 when Light OFF)
+        const spawnProb = sim.lightOn ? 0.18 : 0.05;
+        if (Math.random() < spawnProb && sim.bubblesA.length < 30) {
+          sim.bubblesA.push({
+            x: centerX + (Math.random() - 0.5) * 24,
+            y: plantTopY + Math.random() * 95,
+            r: sim.lightOn ? 3.2 : 2.0,
+            speed: sim.lightOn ? 1.4 : 0.7
+          });
+        }
+
+        sim.bubblesA.forEach(b => {
+          b.y -= b.speed;
+          b.x += Math.sin(b.y * 0.08) * 0.3;
+          btbCtx.fillStyle = sim.lightOn ? 'rgba(255, 255, 255, 0.9)' : 'rgba(254, 240, 138, 0.75)';
+          btbCtx.beginPath();
+          btbCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          btbCtx.fill();
+        });
+        sim.bubblesA = sim.bubblesA.filter(b => b.y > waterTop + 4);
+      }
+
+      btbCtx.restore();
+
+      // Glass Tube Outline
+      btbCtx.strokeStyle = 'rgba(226, 232, 240, 0.85)';
+      btbCtx.lineWidth = 3;
+      btbCtx.beginPath();
+      btbCtx.roundRect(tubeX, tubeY, tubeW, tubeH, [4, 4, 34, 34]);
+      btbCtx.stroke();
+
+      // Stopper Cork
+      btbCtx.fillStyle = '#b45309';
+      btbCtx.beginPath();
+      btbCtx.roundRect(tubeX + 6, tubeY - 9, tubeW - 12, 16, 4);
+      btbCtx.fill();
+
+      // Bottom Caption
+      btbCtx.fillStyle = '#f8fafc';
+      btbCtx.font = 'bold 11px Inter, sans-serif';
+      btbCtx.textAlign = 'center';
+      btbCtx.fillText(captionText, centerX, canvasH - 12);
+    }
+
+    /**
+     * Draw Real-Time pH vs. Time Graph (0-60 min, pH 6.0-8.0)
+     */
+    function drawPHGraph() {
+      const w = phGraphCanvas.width;
+      const h = phGraphCanvas.height;
+      phGraphCtx.clearRect(0, 0, w, h);
+
+      phGraphCtx.fillStyle = '#0f172a';
+      phGraphCtx.fillRect(0, 0, w, h);
+
+      const padLeft = 48;
+      const padRight = 22;
+      const padTop = 20;
+      const padBottom = 42;
+      const plotW = w - padLeft - padRight;
+      const plotH = h - padTop - padBottom;
+
+      // Color-coded horizontal pH zones
+      // Top Blue Zone (pH 7.3 - 8.0)
+      phGraphCtx.fillStyle = 'rgba(37, 99, 235, 0.14)';
+      phGraphCtx.fillRect(padLeft, padTop, plotW, plotH * 0.35);
+      // Middle Green Zone (pH 6.7 - 7.3)
+      phGraphCtx.fillStyle = 'rgba(16, 185, 129, 0.14)';
+      phGraphCtx.fillRect(padLeft, padTop + plotH * 0.35, plotW, plotH * 0.3);
+      // Bottom Yellow Zone (pH 6.0 - 6.7)
+      phGraphCtx.fillStyle = 'rgba(234, 179, 8, 0.14)';
+      phGraphCtx.fillRect(padLeft, padTop + plotH * 0.65, plotW, plotH * 0.35);
+
+      // Horizontal pH Gridlines (6.0, 6.5, 7.0, 7.5, 8.0)
+      phGraphCtx.strokeStyle = '#1e293b';
+      phGraphCtx.lineWidth = 1;
+      for (let ph = 6.0; ph <= 8.01; ph += 0.5) {
+        const y = padTop + plotH - ((ph - 6.0) / 2.0) * plotH;
+        phGraphCtx.beginPath();
+        phGraphCtx.moveTo(padLeft, y);
+        phGraphCtx.lineTo(padLeft + plotW, y);
+        phGraphCtx.stroke();
+
+        phGraphCtx.fillStyle = '#94a3b8';
+        phGraphCtx.font = '11px Inter, sans-serif';
+        phGraphCtx.textAlign = 'right';
+        phGraphCtx.fillText(ph.toFixed(1), padLeft - 8, y + 4);
+      }
+
+      // Vertical Time Gridlines (0, 15, 30, 45, 60 min)
+      for (let t = 0; t <= 60; t += 15) {
+        const x = padLeft + (t / 60) * plotW;
+        phGraphCtx.beginPath();
+        phGraphCtx.moveTo(x, padTop);
+        phGraphCtx.lineTo(x, padTop + plotH);
+        phGraphCtx.stroke();
+
+        phGraphCtx.fillStyle = '#94a3b8';
+        phGraphCtx.font = '11px Inter, sans-serif';
+        phGraphCtx.textAlign = 'center';
+        phGraphCtx.fillText(`${t}m`, x, padTop + plotH + 16);
+      }
+
+      // Axes
+      phGraphCtx.strokeStyle = '#64748b';
+      phGraphCtx.lineWidth = 2;
+      phGraphCtx.beginPath();
+      phGraphCtx.moveTo(padLeft, padTop);
+      phGraphCtx.lineTo(padLeft, padTop + plotH);
+      phGraphCtx.lineTo(padLeft + plotW, padTop + plotH);
+      phGraphCtx.stroke();
+
+      // Axis Titles
+      phGraphCtx.fillStyle = '#e2e8f0';
+      phGraphCtx.font = 'bold 11px Inter, sans-serif';
+      phGraphCtx.textAlign = 'center';
+      phGraphCtx.fillText('Elapsed Time (Minutes)', padLeft + plotW / 2, h - 8);
+
+      phGraphCtx.save();
+      phGraphCtx.translate(14, padTop + plotH / 2);
+      phGraphCtx.rotate(-Math.PI / 2);
+      phGraphCtx.fillText('Solution pH', 0, 0);
+      phGraphCtx.restore();
+
+      // Control Line (Flat dashed line when Control Tube is enabled)
+      if (sim.showControl) {
+        const yCtrl = padTop + plotH - ((sim.startPH - 6.0) / 2.0) * plotH;
+        const xEnd = padLeft + (sim.minutes / 60) * plotW;
+        phGraphCtx.strokeStyle = '#94a3b8';
+        phGraphCtx.setLineDash([5, 5]);
+        phGraphCtx.lineWidth = 2.5;
+        phGraphCtx.beginPath();
+        phGraphCtx.moveTo(padLeft, yCtrl);
+        phGraphCtx.lineTo(xEnd, yCtrl);
+        phGraphCtx.stroke();
+        phGraphCtx.setLineDash([]);
+      }
+
+      // Tube A Curve up to current sim.minutes
+      phGraphCtx.strokeStyle = '#2dd4bf';
+      phGraphCtx.lineWidth = 3;
+      phGraphCtx.beginPath();
+      for (let m = 0; m <= sim.minutes; m++) {
+        const ph = calculatePHAtMinute(m, false);
+        const px = padLeft + (m / 60) * plotW;
+        const py = padTop + plotH - ((ph - 6.0) / 2.0) * plotH;
+        if (m === 0) phGraphCtx.moveTo(px, py);
+        else phGraphCtx.lineTo(px, py);
+      }
+      phGraphCtx.stroke();
+
+      // Active Marker Dot
+      const curPH = calculatePHAtMinute(sim.minutes, false);
+      const curApp = getBTBAppearance(curPH);
+      const curX = padLeft + (sim.minutes / 60) * plotW;
+      const curY = padTop + plotH - ((curPH - 6.0) / 2.0) * plotH;
+
+      phGraphCtx.fillStyle = curApp.rgb;
+      phGraphCtx.beginPath();
+      phGraphCtx.arc(curX, curY, 6.5, 0, Math.PI * 2);
+      phGraphCtx.fill();
+      phGraphCtx.strokeStyle = '#ffffff';
+      phGraphCtx.lineWidth = 2;
+      phGraphCtx.stroke();
+    }
+
+    /**
+     * Log current trial observation to Student Data Table
+     */
+    function recordObservation() {
+      const phA = calculatePHAtMinute(sim.minutes, false);
+      const appA = getBTBAppearance(phA);
+      const condLabel = `${sim.lightOn ? '☀️ Light ON' : '🌑 Dark'} (Elodea)`;
+
+      sim.observations.push({
+        condition: condLabel,
+        startPH: sim.startPH.toFixed(1),
+        time: `${sim.minutes} min`,
+        finalPH: phA.toFixed(2),
+        color: appA.name,
+        badgeClass: appA.badgeClass
+      });
+
+      renderObservationTable();
+      showToast(`Logged: ${condLabel} at ${sim.minutes}m → pH ${phA.toFixed(2)} (${appA.name})`);
+    }
+
+    function renderObservationTable() {
+      const tbody = document.getElementById('obs-table-body');
+      tbody.innerHTML = '';
+
+      if (sim.observations.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-6 px-3 text-center text-slate-400 italic">
+              Run a test and click <strong>"Record Observation"</strong> to log your results!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      sim.observations.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 font-medium text-slate-700';
+        tr.innerHTML = `
+          <td class="py-2 px-2.5 font-bold text-slate-900">${row.condition}</td>
+          <td class="py-2 px-2.5">${row.startPH}</td>
+          <td class="py-2 px-2.5">${row.time}</td>
+          <td class="py-2 px-2.5 font-extrabold text-teal-800">${row.finalPH}</td>
+          <td class="py-2 px-2.5"><span class="px-2 py-0.5 rounded-md text-[11px] font-extrabold ${row.badgeClass}">${row.color}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function clearObservations() {
+      sim.observations = [];
+      renderObservationTable();
+      showToast('Observation log cleared.');
+    }
+
+    /**
+     * Self-Checking 7th-Grade Checkpoints
+     */
+    function checkQuiz(qNum, choice) {
+      const fb = document.getElementById(`q${qNum}-feedback`);
+      fb.classList.remove('hidden');
+
+      const key = {
+        1: {
+          correct: 'C',
+          yes: '✅ Correct! In bright light, Elodea absorbs CO₂ for photosynthesis, lowering carbonic acid and raising the pH above 7.4—turning BTB Blue!',
+          no: '❌ Not quite! Test it in the simulation above with Neutral Green (pH 7.0), Light ON, and Fast-Forward to 60 minutes to see the color change!'
+        },
+        2: {
+          correct: 'A',
+          yes: '✅ Great job! Plants perform cellular respiration 24/7. Without light, photosynthesis stops, so CO₂ builds up and lowers the pH (turning BTB Yellow).',
+          no: '❌ Try again! Remember that in the dark, plants cannot photosynthesize, so they only release CO₂ through cellular respiration.'
+        },
+        3: {
+          correct: 'B',
+          yes: '✅ Exactly! A control tube without Elodea proves that the living plant’s gas exchange—not the light or glass tube—caused the pH change.',
+          no: '❌ Not quite. A control group lacks the experimental variable (the Elodea plant) so we can compare and prove the plant caused the change.'
+        }
+      };
+
+      if (choice === key[qNum].correct) {
+        sim.quizSolved[qNum] = true;
+        fb.className = 'text-xs p-2.5 rounded-lg font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300';
+        fb.textContent = key[qNum].yes;
+      } else {
+        fb.className = 'text-xs p-2.5 rounded-lg font-semibold bg-rose-100 text-rose-900 border border-rose-300';
+        fb.textContent = key[qNum].no;
+      }
+
+      const solved = Object.values(sim.quizSolved).filter(Boolean).length;
+      document.getElementById('quiz-badge').textContent = `${solved} / 3 Answered`;
+    }
+
+    function fullLabReset() {
+      sim.running = false;
+      sim.minutes = 0;
+      sim.startPH = 7.0;
+      sim.lightOn = true;
+      sim.showControl = false;
+      sim.observations = [];
+      sim.quizSolved = { 1: false, 2: false, 3: false };
+      [1, 2, 3].forEach(n => document.getElementById(`q${n}-feedback`).classList.add('hidden'));
+      document.getElementById('quiz-badge').textContent = '0 / 3 Answered';
+      document.getElementById('control-readout-box').classList.add('hidden');
+      document.getElementById('control-toggle-text').textContent = 'Show Control Tube (No Elodea)';
+      document.getElementById('control-toggle-icon').textContent = '➕';
+      setLightCondition(true);
+      renderObservationTable();
+      updateAllUI();
+    }
+
+    function animationLoop() {
+      if (sim.running) {
+        sim.frameCounter++;
+        if (sim.frameCounter >= 8) {
+          sim.frameCounter = 0;
+          if (sim.minutes < 60) {
+            sim.minutes++;
+            updateAllUI();
+          } else {
+            sim.running = false;
+            updateTimerButtonUI();
+          }
+        }
+      }
+      drawApparatusScene();
+      requestAnimationFrame(animationLoop);
+    }
+
+    window.addEventListener('resize', resizeCanvases);
+    window.onload = function () {
+      resizeCanvases();
+      updateAllUI();
+      animationLoop();
+    };
+  </script>
+</body>
+</html>
