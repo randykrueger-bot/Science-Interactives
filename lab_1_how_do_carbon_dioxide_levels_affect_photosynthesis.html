@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 1: How Do Carbon Dioxide Levels Affect Photosynthesis?</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Custom Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 10px;
+      border-radius: 9999px;
+      background: #cbd5e1;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #0284c7;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.45);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.12);
+    }
+
+    /* Digital LCD Sensor Readout Font Styling */
+    .lcd-screen {
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Lab Header -->
+  <header class="bg-gradient-to-r from-sky-800 via-cyan-800 to-teal-800 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-3 text-center sm:text-left">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-2xl shrink-0">
+          🫧
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-cyan-200">LabXchange Virtual Investigation • Lab 1 of 4</div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
+            How Do Carbon Dioxide Levels Affect Photosynthesis?
+          </h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1.5 rounded-xl bg-white/15 border border-white/20 text-xs font-semibold text-cyan-50">
+          6CO<sub>2</sub> + 6H<sub>2</sub>O + Light &rarr; C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> + 6O<sub>2</sub>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 flex flex-col gap-4">
+
+    <!-- Investigation Objective Banner -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+      <div class="flex items-start sm:items-center gap-2.5">
+        <span class="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-800 font-extrabold text-xs uppercase shrink-0">
+          Experiment
+        </span>
+        <p class="text-xs sm:text-sm text-slate-700 leading-snug">
+          An <strong>Elodea</strong> water plant is placed in a test tube under a steady <strong>LED light</strong>. Use the <strong>CO<sub>2</sub> Concentration Slider</strong> (baking soda solution) to test how carbon dioxide affects the rate of oxygen (O<sub>2</sub>) production!
+        </p>
+      </div>
+      <button onclick="resetLab()" class="px-3.5 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shrink-0 transition">
+        ↺ Reset Lab
+      </button>
+    </section>
+
+    <!-- Primary Simulation Split Grid: Left = Test Tube Apparatus, Right = Live Saturation Graph -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+      <!-- LEFT/CENTER (6 cols): Interactive Elodea Test-Tube Workbench -->
+      <section class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between gap-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-base">1. Elodea Test-Tube Apparatus</h2>
+            <p class="text-xs text-slate-500">LED Light: Fixed at Optimal Intensity (100%)</p>
+          </div>
+          <span id="limiting-badge" class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-xs">
+            Limiting Factor: CO<sub>2</sub>
+          </span>
+        </div>
+
+        <!-- Apparatus Canvas + Digital Oxygen Sensor -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+          <!-- Canvas Stage (7 cols) -->
+          <div id="tube-canvas-wrapper" class="sm:col-span-7 relative h-[320px] rounded-2xl bg-slate-900 border-2 border-slate-700 overflow-hidden">
+            <canvas id="tube-canvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <!-- Digital Dissolved Oxygen Sensor Readout (5 cols) -->
+          <div class="sm:col-span-5 flex flex-col gap-3">
+            <div class="rounded-2xl bg-slate-800 p-3.5 border-2 border-slate-700 shadow-md text-white space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300">Digital O<sub>2</sub> Sensor</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              </div>
+
+              <!-- LCD Readout 1: Dissolved Oxygen mg/L -->
+              <div class="lcd-screen rounded-xl bg-emerald-950 border border-emerald-700/70 p-2.5 text-right">
+                <div class="text-[10px] font-bold uppercase text-emerald-400 text-left">Dissolved Oxygen</div>
+                <div id="readout-mg" class="text-2xl font-black text-emerald-300 tracking-tight">7.2 mg/L</div>
+              </div>
+
+              <!-- LCD Readout 2: Bubble Rate -->
+              <div class="lcd-screen rounded-xl bg-sky-950 border border-sky-700/70 p-2.5 text-right">
+                <div class="text-[10px] font-bold uppercase text-sky-400 text-left">O<sub>2</sub> Bubble Rate</div>
+                <div id="readout-bubbles" class="text-xl font-black text-sky-300 tracking-tight">4 bubbles/min</div>
+              </div>
+
+              <!-- LCD Readout 3: Relative Rate % -->
+              <div class="lcd-screen rounded-xl bg-slate-900 border border-slate-700 p-2 text-right">
+                <div class="text-[10px] font-bold uppercase text-slate-400 text-left">Photosynthesis Rate</div>
+                <div id="readout-rate" class="text-lg font-extrabold text-amber-300">8%</div>
+              </div>
+            </div>
+
+            <!-- Record Data Point CTA -->
+            <button onclick="recordTrial()"
+              class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-sm shadow-md transition flex items-center justify-center gap-2">
+              <span>📋</span> Record Data Point
+            </button>
+          </div>
+        </div>
+
+        <!-- CO2 Slider & Preset Controls -->
+        <div class="rounded-2xl bg-sky-50/80 border border-sky-200 p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label for="co2-slider" class="text-xs sm:text-sm font-extrabold text-sky-950 flex items-center gap-1.5">
+              <span>🧪</span> Added Carbon Dioxide (CO<sub>2</sub>) Concentration:
+            </label>
+            <span id="co2-value-badge" class="px-3 py-1 rounded-full bg-sky-600 text-white font-extrabold text-xs sm:text-sm">
+              0% (Very Low)
+            </span>
+          </div>
+
+          <input id="co2-slider" type="range" min="0" max="100" step="5" value="0" oninput="updateCO2(this.value)" class="w-full" />
+
+          <!-- Quick Step Buttons for Easy Chromebook/iPad Testing -->
+          <div class="grid grid-cols-5 gap-1.5 pt-1">
+            <button onclick="updateCO2(0)" class="py-1.5 rounded-lg bg-white hover:bg-sky-100 border border-sky-300 text-sky-950 font-bold text-xs transition">0%</button>
+            <button onclick="updateCO2(25)" class="py-1.5 rounded-lg bg-white hover:bg-sky-100 border border-sky-300 text-sky-950 font-bold text-xs transition">25%</button>
+            <button onclick="updateCO2(50)" class="py-1.5 rounded-lg bg-white hover:bg-sky-100 border border-sky-300 text-sky-950 font-bold text-xs transition">50%</button>
+            <button onclick="updateCO2(75)" class="py-1.5 rounded-lg bg-white hover:bg-sky-100 border border-sky-300 text-sky-950 font-bold text-xs transition">75%</button>
+            <button onclick="updateCO2(100)" class="py-1.5 rounded-lg bg-white hover:bg-sky-100 border border-sky-300 text-sky-950 font-bold text-xs transition">100%</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT (6 cols): Real-Time Saturation Curve Graph -->
+      <section class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between gap-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-base">2. Live Photosynthesis Rate Graph</h2>
+            <p class="text-xs text-slate-500">Added CO<sub>2</sub> Concentration (%) vs. Relative Rate of Photosynthesis (%)</p>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] font-bold">
+            <span class="inline-flex items-center gap-1 text-amber-600"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>Current</span>
+            <span class="inline-flex items-center gap-1 text-emerald-700"><span class="w-3 h-3 rounded-full bg-emerald-600 inline-block"></span>Recorded</span>
+          </div>
+        </div>
+
+        <!-- Graph Canvas -->
+        <div id="graph-canvas-wrapper" class="relative w-full h-[310px] sm:h-[330px] rounded-2xl bg-slate-900 border-2 border-slate-700 overflow-hidden">
+          <canvas id="graph-canvas" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- Dynamic Science Explanation Box -->
+        <div id="science-explanation" class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950 font-medium leading-relaxed">
+          <strong>Low CO<sub>2</sub> (0%):</strong> With almost no carbon dioxide available, the plant lacks a key reactant needed to build glucose. Photosynthesis is very slow, and <strong>CO<sub>2</sub> is the limiting factor</strong>.
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Bottom Section: Recorded Data Table + 7th-Grade Checkpoint Questions -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+      <!-- Recorded Data Table (5 cols) -->
+      <section class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5">
+            <span>📊</span> 3. Student Investigation Data Table
+          </h3>
+          <button onclick="clearDataTable()" class="text-xs font-bold text-rose-600 hover:text-rose-800 underline">
+            Clear Table
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
+                <th class="py-2.5 px-3">Trial</th>
+                <th class="py-2.5 px-3">Added CO<sub>2</sub></th>
+                <th class="py-2.5 px-3">O<sub>2</sub> (mg/L)</th>
+                <th class="py-2.5 px-3">Bubbles/min</th>
+                <th class="py-2.5 px-3">Rate (%)</th>
+              </tr>
+            </thead>
+            <tbody id="data-table-body" class="divide-y divide-slate-100">
+              <tr id="empty-table-row">
+                <td colspan="5" class="py-6 px-3 text-center text-slate-400 italic">
+                  Adjust the CO<sub>2</sub> slider and click <strong>"Record Data Point"</strong> to log your trials!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3 Self-Checking 7th-Grade Checkpoint Questions (7 cols) -->
+      <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5">
+            <span>🧠</span> 4. Check Your Understanding (7th-Grade Questions)
+          </h3>
+          <span id="quiz-score-badge" class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 font-extrabold text-xs">
+            0 / 3 Answered
+          </span>
+        </div>
+
+        <div class="space-y-3 text-xs sm:text-sm">
+
+          <!-- Question 1 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              1. What happens to the rate of photosynthesis as added CO<sub>2</sub> increases from 0% to 40%?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="answerQuiz(1, 'A', this)" class="q1-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                A) It decreases steadily
+              </button>
+              <button onclick="answerQuiz(1, 'B', this)" class="q1-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                B) It increases rapidly
+              </button>
+              <button onclick="answerQuiz(1, 'C', this)" class="q1-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                C) It stays at 0%
+              </button>
+            </div>
+            <div id="q1-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              2. Why does the graph flatten out (plateau) at high CO<sub>2</sub> concentrations (above 65%)?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button onclick="answerQuiz(2, 'A', this)" class="q2-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                A) The plant's chloroplasts &amp; light energy are working at maximum capacity (saturated)
+              </button>
+              <button onclick="answerQuiz(2, 'B', this)" class="q2-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                B) The plant stops needing water for photosynthesis
+              </button>
+            </div>
+            <div id="q2-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+          <!-- Question 3 -->
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="font-bold text-slate-900">
+              3. What gas is inside the bubbles rising from the Elodea leaves during photosynthesis?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="answerQuiz(3, 'A', this)" class="q3-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                A) Carbon Dioxide (CO<sub>2</sub>)
+              </button>
+              <button onclick="answerQuiz(3, 'B', this)" class="q3-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                B) Oxygen (O<sub>2</sub>)
+              </button>
+              <button onclick="answerQuiz(3, 'C', this)" class="q3-btn py-2 px-3 rounded-lg bg-white hover:bg-sky-50 border border-slate-300 font-semibold text-left transition">
+                C) Nitrogen (N<sub>2</sub>)
+              </button>
+            </div>
+            <div id="q3-feedback" class="hidden text-xs p-2.5 rounded-lg font-medium"></div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast-box" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+    <div id="toast-text" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-xl">
+      Data point recorded!
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Lab 1 Simulation State & Biological Saturation Curve Model
+     */
+    const labState = {
+      co2: 0,               // 0 to 100 (%)
+      rate: 8,              // Relative photosynthesis rate (%)
+      dissolvedO2: 7.2,     // mg/L
+      bubblesPerMin: 4,     // bubbles/min
+      bubbles: [],          // animated O2 bubbles in test tube
+      co2Molecules: [],     // floating CO2 particles in water
+      recordedTrials: [],   // logged student trials
+      quizAnswered: { 1: false, 2: false, 3: false }
+    };
+
+    const tubeCanvas = document.getElementById('tube-canvas');
+    const tubeCtx = tubeCanvas.getContext('2d');
+    const graphCanvas = document.getElementById('graph-canvas');
+    const graphCtx = graphCanvas.getContext('2d');
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-text').textContent = msg;
+      box.classList.remove('opacity-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('opacity-0'), 2000);
+    }
+
+    /**
+     * Michaelis-Menten style saturation curve matching LabXchange curve:
+     * Rises steeply at low CO2, then plateaus around ~92% when light/enzymes become saturated.
+     */
+    function calculatePhotosynthesisRate(co2Percent) {
+      const baseline = 6; // trace dissolved CO2 in tap water
+      const maxGain = 88;
+      const halfSaturation = 22;
+      const raw = baseline + (maxGain * co2Percent) / (halfSaturation + co2Percent);
+      return Math.round(Math.min(94, raw));
+    }
+
+    /**
+     * Update CO2 concentration and recalculate all sensor values & explanations
+     */
+    function updateCO2(val) {
+      labState.co2 = parseInt(val, 10);
+      document.getElementById('co2-slider').value = labState.co2;
+
+      labState.rate = calculatePhotosynthesisRate(labState.co2);
+      labState.dissolvedO2 = +(6.8 + (labState.rate / 100) * 6.4).toFixed(1);
+      labState.bubblesPerMin = Math.round(3 + (labState.rate / 100) * 42);
+
+      // Update UI badges & LCD readouts
+      let levelText = 'Very Low';
+      if (labState.co2 >= 70) levelText = 'High (Saturated)';
+      else if (labState.co2 >= 35) levelText = 'Moderate';
+      else if (labState.co2 > 0) levelText = 'Low';
+
+      document.getElementById('co2-value-badge').textContent = `${labState.co2}% (${levelText})`;
+      document.getElementById('readout-mg').textContent = `${labState.dissolvedO2.toFixed(1)} mg/L`;
+      document.getElementById('readout-bubbles').textContent = `${labState.bubblesPerMin} bubbles/min`;
+      document.getElementById('readout-rate').textContent = `${labState.rate}%`;
+
+      const limitingBadge = document.getElementById('limiting-badge');
+      const expBox = document.getElementById('science-explanation');
+
+      if (labState.co2 < 35) {
+        limitingBadge.className = 'px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-xs';
+        limitingBadge.innerHTML = 'Limiting Factor: CO<sub>2</sub>';
+        expBox.className = 'p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>Low CO<sub>2</sub> (${labState.co2}%):</strong> Carbon dioxide is in short supply. Adding more CO<sub>2</sub> immediately increases the rate of photosynthesis because <strong>CO<sub>2</sub> is the limiting factor</strong>.`;
+      } else if (labState.co2 < 65) {
+        limitingBadge.className = 'px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 font-bold text-xs';
+        limitingBadge.innerHTML = 'Transitioning to Saturation';
+        expBox.className = 'p-3.5 rounded-xl bg-sky-50 border border-sky-200 text-xs sm:text-sm text-sky-950 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>Moderate CO<sub>2</sub> (${labState.co2}%):</strong> The Elodea plant is producing oxygen bubbles much faster (${labState.bubblesPerMin} bubbles/min), though the curve is starting to bend as chloroplasts near capacity.`;
+      } else {
+        limitingBadge.className = 'px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs';
+        limitingBadge.innerHTML = 'Saturated (Light/Chloroplast Limit)';
+        expBox.className = 'p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-950 font-medium leading-relaxed';
+        expBox.innerHTML = `<strong>High CO<sub>2</sub> (${labState.co2}%) — Plateau Reached!</strong> Adding even more CO<sub>2</sub> no longer increases the rate (~${labState.rate}%). The plant's chloroplasts and fixed LED light intensity are now <strong>saturated</strong> (working at top speed).`;
+      }
+
+      syncCO2VisualParticles();
+      drawSaturationGraph();
+    }
+
+    /**
+     * Keep dissolved CO2 specks inside the test tube proportional to slider
+     */
+    function syncCO2VisualParticles() {
+      const targetCount = Math.round((labState.co2 / 100) * 32);
+      while (labState.co2Molecules.length < targetCount) {
+        labState.co2Molecules.push({
+          rx: (Math.random() - 0.5) * 48,
+          ry: Math.random() * 190,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4
+        });
+      }
+      while (labState.co2Molecules.length > targetCount) {
+        labState.co2Molecules.pop();
+      }
+    }
+
+    /**
+     * Resize canvases cleanly on load and window resize
+     */
+    function resizeCanvases() {
+      const tubeWrap = document.getElementById('tube-canvas-wrapper');
+      if (tubeWrap) {
+        tubeCanvas.width = tubeWrap.clientWidth;
+        tubeCanvas.height = tubeWrap.clientHeight;
+      }
+      const graphWrap = document.getElementById('graph-canvas-wrapper');
+      if (graphWrap) {
+        graphCanvas.width = graphWrap.clientWidth;
+        graphCanvas.height = graphWrap.clientHeight;
+      }
+      drawSaturationGraph();
+    }
+
+    /**
+     * Draw LED Lamp, Light Beam, Glass Test Tube, Elodea Plant, and Rising O2 Bubbles
+     */
+    function drawTestTubeScene() {
+      const w = tubeCanvas.width;
+      const h = tubeCanvas.height;
+      tubeCtx.clearRect(0, 0, w, h);
+
+      // Dark lab backdrop
+      tubeCtx.fillStyle = '#0f172a';
+      tubeCtx.fillRect(0, 0, w, h);
+
+      // 1. LED Lamp on the left side
+      const lampX = 28;
+      const lampY = h * 0.52;
+
+      // Light cone beam shining onto the test tube
+      const tubeCenterX = w * 0.62;
+      const beamGrad = tubeCtx.createLinearGradient(lampX + 20, lampY, tubeCenterX + 35, lampY);
+      beamGrad.addColorStop(0, 'rgba(253, 224, 71, 0.55)');
+      beamGrad.addColorStop(0.7, 'rgba(253, 224, 71, 0.18)');
+      beamGrad.addColorStop(1, 'rgba(253, 224, 71, 0.02)');
+      tubeCtx.fillStyle = beamGrad;
+      tubeCtx.beginPath();
+      tubeCtx.moveTo(lampX + 18, lampY - 16);
+      tubeCtx.lineTo(tubeCenterX + 36, lampY - 95);
+      tubeCtx.lineTo(tubeCenterX + 36, lampY + 95);
+      tubeCtx.lineTo(lampX + 18, lampY + 16);
+      tubeCtx.closePath();
+      tubeCtx.fill();
+
+      // Lamp Housing & Glowing Bulb
+      tubeCtx.fillStyle = '#475569';
+      tubeCtx.beginPath();
+      tubeCtx.roundRect(6, lampY - 22, 24, 44, 6);
+      tubeCtx.fill();
+
+      tubeCtx.fillStyle = '#fef08a';
+      tubeCtx.beginPath();
+      tubeCtx.arc(32, lampY, 15, -Math.PI / 2, Math.PI / 2);
+      tubeCtx.fill();
+
+      tubeCtx.fillStyle = '#cbd5e1';
+      tubeCtx.font = 'bold 10px Inter, sans-serif';
+      tubeCtx.textAlign = 'center';
+      tubeCtx.fillText('LED Lamp', 26, lampY + 38);
+
+      // 2. Test Tube Dimensions
+      const tubeW = 72;
+      const tubeH = h - 64;
+      const tubeX = tubeCenterX - tubeW / 2;
+      const tubeY = 36;
+
+      // Water fill inside test tube
+      const waterTop = tubeY + 26;
+      const waterH = tubeH - 26;
+      tubeCtx.save();
+      tubeCtx.beginPath();
+      tubeCtx.roundRect(tubeX, waterTop, tubeW, waterH, [0, 0, 36, 36]);
+      tubeCtx.clip();
+
+      const waterGrad = tubeCtx.createLinearGradient(tubeX, waterTop, tubeX + tubeW, waterTop);
+      waterGrad.addColorStop(0, 'rgba(14, 165, 233, 0.35)');
+      waterGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.25)');
+      waterGrad.addColorStop(1, 'rgba(2, 132, 199, 0.42)');
+      tubeCtx.fillStyle = waterGrad;
+      tubeCtx.fillRect(tubeX, waterTop, tubeW, waterH);
+
+      // Dissolved CO2 molecules floating in water
+      tubeCtx.fillStyle = 'rgba(226, 232, 240, 0.55)';
+      labState.co2Molecules.forEach(m => {
+        m.rx += m.vx;
+        m.ry += m.vy;
+        if (m.rx < -26 || m.rx > 26) m.vx *= -1;
+        if (m.ry < 10 || m.ry > waterH - 25) m.vy *= -1;
+        tubeCtx.beginPath();
+        tubeCtx.arc(tubeCenterX + m.rx, waterTop + m.ry, 2.2, 0, Math.PI * 2);
+        tubeCtx.fill();
+      });
+
+      // 3. Green Elodea Aquatic Plant inside tube
+      const plantBottomY = tubeY + tubeH - 16;
+      const plantTopY = waterTop + 34;
+      tubeCtx.strokeStyle = '#15803d';
+      tubeCtx.lineWidth = 4;
+      tubeCtx.beginPath();
+      tubeCtx.moveTo(tubeCenterX, plantBottomY);
+      tubeCtx.lineTo(tubeCenterX, plantTopY);
+      tubeCtx.stroke();
+
+      // Elodea Whorled Leaves
+      for (let ly = plantBottomY - 12; ly >= plantTopY; ly -= 14) {
+        tubeCtx.fillStyle = '#22c55e';
+        tubeCtx.beginPath();
+        tubeCtx.ellipse(tubeCenterX - 13, ly, 12, 4.5, -0.35, 0, Math.PI * 2);
+        tubeCtx.ellipse(tubeCenterX + 13, ly - 3, 12, 4.5, 0.35, 0, Math.PI * 2);
+        tubeCtx.fill();
+      }
+
+      // 4. Spawn & Animate Rising Oxygen (O2) Bubbles
+      const spawnProbability = 0.02 + (labState.rate / 100) * 0.32;
+      if (Math.random() < spawnProbability && labState.bubbles.length < 45) {
+        labState.bubbles.push({
+          x: tubeCenterX + (Math.random() - 0.5) * 28,
+          y: plantTopY + Math.random() * 90,
+          r: 2.5 + Math.random() * 2.5,
+          speed: 0.9 + (labState.rate / 100) * 1.4
+        });
+      }
+
+      labState.bubbles.forEach(b => {
+        b.y -= b.speed;
+        b.x += Math.sin(b.y * 0.08) * 0.35;
+
+        tubeCtx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        tubeCtx.strokeStyle = '#38bdf8';
+        tubeCtx.lineWidth = 1;
+        tubeCtx.beginPath();
+        tubeCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        tubeCtx.fill();
+        tubeCtx.stroke();
+      });
+      labState.bubbles = labState.bubbles.filter(b => b.y > waterTop + 4);
+
+      tubeCtx.restore();
+
+      // Glass Test Tube Outline & Rim
+      tubeCtx.strokeStyle = 'rgba(226, 232, 240, 0.8)';
+      tubeCtx.lineWidth = 3;
+      tubeCtx.beginPath();
+      tubeCtx.roundRect(tubeX, tubeY, tubeW, tubeH, [4, 4, 36, 36]);
+      tubeCtx.stroke();
+
+      // Rubber Stopper / CO2 & O2 Tubing at Top
+      tubeCtx.fillStyle = '#d97706';
+      tubeCtx.beginPath();
+      tubeCtx.roundRect(tubeX + 6, tubeY - 10, tubeW - 12, 18, 4);
+      tubeCtx.fill();
+
+      // Labels
+      tubeCtx.fillStyle = '#e2e8f0';
+      tubeCtx.font = 'bold 11px Inter, sans-serif';
+      tubeCtx.textAlign = 'center';
+      tubeCtx.fillText('Elodea + CO₂ Water', tubeCenterX, h - 10);
+    }
+
+    /**
+     * Draw Saturation Curve Graph (X = Added CO2 %, Y = Relative Rate %)
+     */
+    function drawSaturationGraph() {
+      const w = graphCanvas.width;
+      const h = graphCanvas.height;
+      graphCtx.clearRect(0, 0, w, h);
+
+      graphCtx.fillStyle = '#0f172a';
+      graphCtx.fillRect(0, 0, w, h);
+
+      const padLeft = 52;
+      const padRight = 24;
+      const padTop = 24;
+      const padBottom = 44;
+      const plotW = w - padLeft - padRight;
+      const plotH = h - padTop - padBottom;
+
+      // Grid lines
+      graphCtx.strokeStyle = '#1e293b';
+      graphCtx.lineWidth = 1;
+      for (let pct = 0; pct <= 100; pct += 25) {
+        const y = padTop + plotH - (pct / 100) * plotH;
+        graphCtx.beginPath();
+        graphCtx.moveTo(padLeft, y);
+        graphCtx.lineTo(padLeft + plotW, y);
+        graphCtx.stroke();
+
+        graphCtx.fillStyle = '#94a3b8';
+        graphCtx.font = '11px Inter, sans-serif';
+        graphCtx.textAlign = 'right';
+        graphCtx.fillText(`${pct}%`, padLeft - 8, y + 4);
+      }
+
+      for (let xPct = 0; xPct <= 100; xPct += 25) {
+        const x = padLeft + (xPct / 100) * plotW;
+        graphCtx.beginPath();
+        graphCtx.moveTo(x, padTop);
+        graphCtx.lineTo(x, padTop + plotH);
+        graphCtx.stroke();
+
+        graphCtx.fillStyle = '#94a3b8';
+        graphCtx.font = '11px Inter, sans-serif';
+        graphCtx.textAlign = 'center';
+        graphCtx.fillText(`${xPct}%`, x, padTop + plotH + 16);
+      }
+
+      // Axes lines
+      graphCtx.strokeStyle = '#64748b';
+      graphCtx.lineWidth = 2;
+      graphCtx.beginPath();
+      graphCtx.moveTo(padLeft, padTop);
+      graphCtx.lineTo(padLeft, padTop + plotH);
+      graphCtx.lineTo(padLeft + plotW, padTop + plotH);
+      graphCtx.stroke();
+
+      // Axis Titles
+      graphCtx.fillStyle = '#e2e8f0';
+      graphCtx.font = 'bold 11px Inter, sans-serif';
+      graphCtx.textAlign = 'center';
+      graphCtx.fillText('Added Carbon Dioxide Concentration (CO₂ %)', padLeft + plotW / 2, h - 8);
+
+      graphCtx.save();
+      graphCtx.translate(15, padTop + plotH / 2);
+      graphCtx.rotate(-Math.PI / 2);
+      graphCtx.fillText('Photosynthesis Rate (%)', 0, 0);
+      graphCtx.restore();
+
+      // Dashed Theoretical Saturation Curve Reference
+      graphCtx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+      graphCtx.setLineDash([5, 5]);
+      graphCtx.lineWidth = 2.5;
+      graphCtx.beginPath();
+      for (let c = 0; c <= 100; c += 2) {
+        const r = calculatePhotosynthesisRate(c);
+        const px = padLeft + (c / 100) * plotW;
+        const py = padTop + plotH - (r / 100) * plotH;
+        if (c === 0) graphCtx.moveTo(px, py);
+        else graphCtx.lineTo(px, py);
+      }
+      graphCtx.stroke();
+      graphCtx.setLineDash([]);
+
+      // Recorded Student Data Points (Green circles connected by solid line)
+      if (labState.recordedTrials.length > 0) {
+        const sorted = [...labState.recordedTrials].sort((a, b) => a.co2 - b.co2);
+        graphCtx.strokeStyle = '#10b981';
+        graphCtx.lineWidth = 2.5;
+        graphCtx.beginPath();
+        sorted.forEach((pt, idx) => {
+          const px = padLeft + (pt.co2 / 100) * plotW;
+          const py = padTop + plotH - (pt.rate / 100) * plotH;
+          if (idx === 0) graphCtx.moveTo(px, py);
+          else graphCtx.lineTo(px, py);
+        });
+        graphCtx.stroke();
+
+        sorted.forEach(pt => {
+          const px = padLeft + (pt.co2 / 100) * plotW;
+          const py = padTop + plotH - (pt.rate / 100) * plotH;
+          graphCtx.fillStyle = '#10b981';
+          graphCtx.beginPath();
+          graphCtx.arc(px, py, 5.5, 0, Math.PI * 2);
+          graphCtx.fill();
+          graphCtx.strokeStyle = '#ffffff';
+          graphCtx.lineWidth = 1.5;
+          graphCtx.stroke();
+        });
+      }
+
+      // Live Active Cursor Dot (Glowing Amber)
+      const curX = padLeft + (labState.co2 / 100) * plotW;
+      const curY = padTop + plotH - (labState.rate / 100) * plotH;
+
+      graphCtx.fillStyle = 'rgba(245, 158, 11, 0.28)';
+      graphCtx.beginPath();
+      graphCtx.arc(curX, curY, 13, 0, Math.PI * 2);
+      graphCtx.fill();
+
+      graphCtx.fillStyle = '#f59e0b';
+      graphCtx.beginPath();
+      graphCtx.arc(curX, curY, 6.5, 0, Math.PI * 2);
+      graphCtx.fill();
+      graphCtx.strokeStyle = '#ffffff';
+      graphCtx.lineWidth = 2;
+      graphCtx.stroke();
+    }
+
+    /**
+     * Record current CO2 & Sensor trial into the student data table
+     */
+    function recordTrial() {
+      const existingIdx = labState.recordedTrials.findIndex(t => t.co2 === labState.co2);
+      const entry = {
+        co2: labState.co2,
+        dissolvedO2: labState.dissolvedO2,
+        bubblesPerMin: labState.bubblesPerMin,
+        rate: labState.rate
+      };
+
+      if (existingIdx >= 0) {
+        labState.recordedTrials[existingIdx] = entry;
+        showToast(`Updated trial for ${labState.co2}% CO₂!`);
+      } else {
+        labState.recordedTrials.push(entry);
+        showToast(`Recorded ${labState.co2}% CO₂ → ${labState.rate}% rate!`);
+      }
+
+      renderDataTable();
+      drawSaturationGraph();
+    }
+
+    function renderDataTable() {
+      const tbody = document.getElementById('data-table-body');
+      tbody.innerHTML = '';
+
+      if (labState.recordedTrials.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-6 px-3 text-center text-slate-400 italic">
+              Adjust the CO<sub>2</sub> slider and click <strong>"Record Data Point"</strong> to log your trials!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      labState.recordedTrials.forEach((trial, index) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 font-medium text-slate-700';
+        tr.innerHTML = `
+          <td class="py-2 px-3 font-bold text-slate-900">#${index + 1}</td>
+          <td class="py-2 px-3 font-bold text-sky-700">${trial.co2}%</td>
+          <td class="py-2 px-3">${trial.dissolvedO2.toFixed(1)} mg/L</td>
+          <td class="py-2 px-3">${trial.bubblesPerMin} / min</td>
+          <td class="py-2 px-3 font-extrabold text-emerald-700">${trial.rate}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function clearDataTable() {
+      labState.recordedTrials = [];
+      renderDataTable();
+      drawSaturationGraph();
+      showToast('Data table cleared.');
+    }
+
+    /**
+     * Self-checking 7th-grade checkpoint questions
+     */
+    function answerQuiz(qNum, choice, btnEl) {
+      const feedbackEl = document.getElementById(`q${qNum}-feedback`);
+      feedbackEl.classList.remove('hidden');
+
+      const answers = {
+        1: {
+          correct: 'B',
+          yes: '✅ Correct! Between 0% and 40%, CO₂ is the limiting factor—so adding more CO₂ speeds up photosynthesis.',
+          no: '❌ Not quite. Watch the left side of the graph as you move the slider from 0% to 40%—the line climbs steeply upward!'
+        },
+        2: {
+          correct: 'A',
+          yes: '✅ Spot on! Once chloroplasts have plenty of CO₂, light energy and enzyme speed limit how fast photosynthesis can go, causing the plateau.',
+          no: '❌ Try again! Plants still need water, but at high CO₂ levels the plant’s light-capturing machinery is already running at maximum speed.'
+        },
+        3: {
+          correct: 'B',
+          yes: '✅ Correct! Plants take in CO₂ and water and release Oxygen gas (O₂) as a product of photosynthesis.',
+          no: '❌ Check the equation at the top: CO₂ goes IN as a reactant, and Oxygen gas (O₂) comes OUT as bubbles!'
+        }
+      };
+
+      const isRight = choice === answers[qNum].correct;
+      if (isRight) {
+        labState.quizAnswered[qNum] = true;
+        feedbackEl.className = 'text-xs p-2.5 rounded-lg font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300';
+        feedbackEl.textContent = answers[qNum].yes;
+      } else {
+        feedbackEl.className = 'text-xs p-2.5 rounded-lg font-semibold bg-rose-100 text-rose-900 border border-rose-300';
+        feedbackEl.textContent = answers[qNum].no;
+      }
+
+      const totalRight = Object.values(labState.quizAnswered).filter(Boolean).length;
+      document.getElementById('quiz-score-badge').textContent = `${totalRight} / 3 Answered`;
+    }
+
+    function resetLab() {
+      labState.recordedTrials = [];
+      labState.quizAnswered = { 1: false, 2: false, 3: false };
+      [1, 2, 3].forEach(n => document.getElementById(`q${n}-feedback`).classList.add('hidden'));
+      document.getElementById('quiz-score-badge').textContent = '0 / 3 Answered';
+      renderDataTable();
+      updateCO2(0);
+    }
+
+    function animate() {
+      drawTestTubeScene();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvases);
+    window.onload = function () {
+      resizeCanvases();
+      updateCO2(0);
+      animate();
+    };
+  </script>
+</body>
+</html>
